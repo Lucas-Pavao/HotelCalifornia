@@ -35,7 +35,7 @@ public class HotelCaliforniaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HotelCaliforniaModel> getHotelById(@PathVariable UUID id) {
+    public ResponseEntity<HotelCaliforniaModel> getHotelById(@PathVariable Long id) {
         return repository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -49,21 +49,22 @@ public class HotelCaliforniaController {
 
     @PutMapping
     public ResponseEntity<HotelCaliforniaModel> updateHotel(@RequestBody HotelCaliforniaModel hotel) {
-       
         if (repository.existsById(hotel.getId())) {
             HotelCaliforniaModel updatedHotel = repository.findById(hotel.getId()).get();
             updatedHotel.setName(hotel.getName());
             updatedHotel.setLocal(hotel.getLocal());
             updatedHotel.setCapacidade(hotel.getCapacidade());
             updatedHotel.setCnpj(hotel.getCnpj());
+            repository.save(updatedHotel);
             return ResponseEntity.ok(updatedHotel);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteHotel(@PathVariable UUID id) {
+    public ResponseEntity<String> deleteHotel(@PathVariable Long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
             return ResponseEntity.ok().body("Deletado com sucesso");
