@@ -33,6 +33,13 @@ public class HotelCaliforniaController {
     public List<HotelCaliforniaModel> hotelCaliforniaGetAll() {
         return repository.findAll();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<HotelCaliforniaModel> getHotelById(@PathVariable UUID id) {
+        return repository.findById(id)
+                .map(hotel -> ResponseEntity.ok().body(hotel))
+                .orElse(ResponseEntity.notFound().build());
+    }
   
     @PostMapping
     public ResponseEntity<HotelCaliforniaModel> createHotel(@RequestBody HotelCaliforniaModel hotel) {
