@@ -3,6 +3,7 @@ package br.com.lucasPavao.hotelCalifornia.api;
 import java.util.List;
 import java.util.UUID;
 
+import br.com.lucasPavao.hotelCalifornia.services.HotelCaliforniaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,55 +23,34 @@ import br.com.lucasPavao.hotelCalifornia.repository.HotelCaliforniaRepository;
 @RequestMapping("/api/hotelCalifornia") 
 public class HotelCaliforniaController {
 
-    private final HotelCaliforniaRepository repository;
-
     @Autowired
-    public HotelCaliforniaController(HotelCaliforniaRepository repository) {
-        this.repository = repository;
-    }
+    private  HotelCaliforniaService service;
 
     @GetMapping
     public List<HotelCaliforniaModel> hotelCaliforniaGetAll() {
-        return repository.findAll();
+    return service.findAll();
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<HotelCaliforniaModel> getHotelById(@PathVariable UUID id) {
-        return repository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<HotelCaliforniaModel> getHotelById(@PathVariable(value = "id") UUID id) {
+    return ResponseEntity.ok(service.findById(id));
     }
   
     @PostMapping
     public ResponseEntity<HotelCaliforniaModel> createHotel(@RequestBody HotelCaliforniaModel hotel) {
-        HotelCaliforniaModel savedHotel = repository.save(hotel);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedHotel);
+        return ResponseEntity.ok(service.create(hotel));
     }
 
-    @PutMapping
-    public ResponseEntity<HotelCaliforniaModel> updateHotel(@RequestBody HotelCaliforniaModel hotel) {
-        if (repository.existsById(hotel.getId())) {
-            HotelCaliforniaModel updatedHotel = repository.findById(hotel.getId()).get();
-            updatedHotel.setName(hotel.getName());
-            updatedHotel.setLocal(hotel.getLocal());
-            updatedHotel.setCapacidade(hotel.getCapacidade());
-            updatedHotel.setCnpj(hotel.getCnpj());
-            repository.save(updatedHotel);
-            return ResponseEntity.ok(updatedHotel);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @PutMapping(value ="/{id}")
+    public ResponseEntity<HotelCaliforniaModel> updateHotel(@PathVariable(value = "id") UUID id, @RequestBody HotelCaliforniaModel hotel) {
+        return ResponseEntity.ok(service.update(id, hotel));
     }
 
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<String> deleteHotel(@PathVariable UUID id) {
-        if (repository.existsById(id)) {
-            repository.deleteById(id);
-            return ResponseEntity.ok().body("Deletado com sucesso");
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Boolean> deleteHotel(@PathVariable(value = "id") UUID id) {
+       service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
 
