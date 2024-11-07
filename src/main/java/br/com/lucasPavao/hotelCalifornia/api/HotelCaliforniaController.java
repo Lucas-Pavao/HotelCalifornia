@@ -3,75 +3,50 @@ package br.com.lucasPavao.hotelCalifornia.api;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import br.com.lucasPavao.hotelCalifornia.services.HotelCaliforniaService;
+import com.sun.istack.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import br.com.lucasPavao.hotelCalifornia.model.HotelCaliforniaModel;
-import br.com.lucasPavao.hotelCalifornia.repository.HotelCaliforniaRepository;
 
 @RestController
-@RequestMapping("/api/hotelCalifornia") 
+@RequestMapping("/api/hotelCalifornia")
 public class HotelCaliforniaController {
 
-    private final HotelCaliforniaRepository repository;
+    private final HotelCaliforniaService service;
 
-    @Autowired
-    public HotelCaliforniaController(HotelCaliforniaRepository repository) {
-        this.repository = repository;
+    public HotelCaliforniaController(HotelCaliforniaService service) {
+        this.service = service;
     }
 
     @GetMapping
-    public List<HotelCaliforniaModel> hotelCaliforniaGetAll() {
-        return repository.findAll();
+    public ResponseEntity<List<HotelCaliforniaModel>> getAllHotels() {
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HotelCaliforniaModel> getHotelById(@PathVariable Long id) {
-        return repository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<HotelCaliforniaModel> getHotelById(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.findById(id));
     }
-  
+
     @PostMapping
-    public ResponseEntity<HotelCaliforniaModel> createHotel(@RequestBody HotelCaliforniaModel hotel) {
-        HotelCaliforniaModel savedHotel = repository.save(hotel);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedHotel);
+    public ResponseEntity<HotelCaliforniaModel> createHotel(@NotNull @RequestBody HotelCaliforniaModel hotel) {
+        HotelCaliforniaModel createdHotel = service.create(hotel);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdHotel);
     }
 
-    @PutMapping
-    public ResponseEntity<HotelCaliforniaModel> updateHotel(@RequestBody HotelCaliforniaModel hotel) {
-        if (repository.existsById(hotel.getId())) {
-            HotelCaliforniaModel updatedHotel = repository.findById(hotel.getId()).get();
-            updatedHotel.setName(hotel.getName());
-            updatedHotel.setLocal(hotel.getLocal());
-            updatedHotel.setCapacidade(hotel.getCapacidade());
-            updatedHotel.setCnpj(hotel.getCnpj());
-            repository.save(updatedHotel);
-            return ResponseEntity.ok(updatedHotel);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @PutMapping("/{id}")
+    public ResponseEntity<HotelCaliforniaModel> updateHotel(
+            @PathVariable UUID id,
+            @NotNull @RequestBody HotelCaliforniaModel hotel) {
+        return ResponseEntity.ok(service.update(id, hotel));
     }
-
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteHotel(@PathVariable Long id) {
-        if (repository.existsById(id)) {
-            repository.deleteById(id);
-            return ResponseEntity.ok().body("Deletado com sucesso");
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> deleteHotel(@PathVariable UUID id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
-
-
 }
