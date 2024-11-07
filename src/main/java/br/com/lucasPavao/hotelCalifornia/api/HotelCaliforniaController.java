@@ -34,8 +34,8 @@ public class HotelCaliforniaController {
         return repository.findAll();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<HotelCaliforniaModel> getHotelById(@PathVariable Long id) {
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<HotelCaliforniaModel> getHotelById(@PathVariable UUID id) {
         return repository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -63,8 +63,8 @@ public class HotelCaliforniaController {
     }
 
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteHotel(@PathVariable Long id) {
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<String> deleteHotel(@PathVariable UUID id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
             return ResponseEntity.ok().body("Deletado com sucesso");

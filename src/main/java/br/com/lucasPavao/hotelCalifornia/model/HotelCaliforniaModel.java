@@ -28,7 +28,7 @@ public class HotelCaliforniaModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private UUID id;
 
     @Column(name="name")
     private String name;
