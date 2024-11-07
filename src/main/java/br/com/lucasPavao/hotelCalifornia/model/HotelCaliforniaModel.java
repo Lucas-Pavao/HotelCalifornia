@@ -27,8 +27,8 @@ import org.hibernate.annotations.Type;
 public class HotelCaliforniaModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @Column(columnDefinition = "UUID")
+    private UUID id = UUID.randomUUID();
 
     @Column(name="name")
     private String name;
