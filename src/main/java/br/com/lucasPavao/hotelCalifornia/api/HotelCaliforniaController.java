@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import br.com.lucasPavao.hotelCalifornia.model.HotelCaliforniaModel;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api/hotelCalifornia")
 public class HotelCaliforniaController {
@@ -32,15 +34,17 @@ public class HotelCaliforniaController {
     }
 
     @PostMapping
-    public ResponseEntity<HotelCaliforniaModel> createHotel(@NotNull @RequestBody HotelCaliforniaModel hotel) {
-        HotelCaliforniaModel createdHotel = service.create(hotel);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdHotel);
+    public ResponseEntity<HotelCaliforniaModel> createHotel(@Valid @NotNull @RequestBody HotelCaliforniaModel hotel) {
+
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(hotel));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<HotelCaliforniaModel> updateHotel(
             @PathVariable UUID id,
-            @NotNull @RequestBody HotelCaliforniaModel hotel) {
+            @Valid @NotNull @RequestBody HotelCaliforniaModel hotel) {
+
         return ResponseEntity.ok(service.update(id, hotel));
     }
 
