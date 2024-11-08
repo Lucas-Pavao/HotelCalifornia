@@ -6,6 +6,7 @@ import br.com.lucasPavao.hotelCalifornia.repository.HotelCaliforniaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -29,12 +30,15 @@ public class HotelCaliforniaService {
     }
 
     @Transactional
-    public HotelCaliforniaModel create(HotelCaliforniaModel hotel) {
+    public HotelCaliforniaModel create(@Valid HotelCaliforniaModel hotel) {
+
+
+
         return repository.save(hotel);
     }
 
     @Transactional
-    public HotelCaliforniaModel update(UUID id, HotelCaliforniaModel hotel) {
+    public HotelCaliforniaModel update(UUID id,@Valid HotelCaliforniaModel hotel) {
         HotelCaliforniaModel existingHotel = repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Hotel com ID " + id + " não encontrado."));
 
