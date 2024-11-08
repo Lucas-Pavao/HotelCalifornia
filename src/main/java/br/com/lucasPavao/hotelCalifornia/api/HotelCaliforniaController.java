@@ -35,14 +35,16 @@ public class HotelCaliforniaController {
 
     @PostMapping
     public ResponseEntity<HotelCaliforniaModel> createHotel(@Valid @NotNull @RequestBody HotelCaliforniaModel hotel) {
-        HotelCaliforniaModel createdHotel = service.create(hotel);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdHotel);
+
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(hotel));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<HotelCaliforniaModel> updateHotel(
             @PathVariable UUID id,
             @Valid @NotNull @RequestBody HotelCaliforniaModel hotel) {
+
         return ResponseEntity.ok(service.update(id, hotel));
     }
 
