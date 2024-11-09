@@ -22,18 +22,36 @@ public class HotelCaliforniaService {
     }
 
     public List<HotelCaliforniaModel> findAll() {
-        return repository.findAll();
+
+        List<HotelCaliforniaModel> hotels = repository.findAll();
+
+        for (HotelCaliforniaModel hotel : hotels) {
+            // Remove a máscara, caso o CNPJ já esteja formatado
+            String cnpjSemMascara = removerMascaraCNPJ(hotel.getCnpj());
+
+            // Aplica a máscara ao CNPJ
+            String cnpjComMascara = aplicarMascaraCNPJ(cnpjSemMascara);
+
+            // Atualiza o CNPJ do hotel com a máscara
+            hotel.setCnpj(cnpjComMascara);
+        }
+
+        return hotels;
     }
 
     public HotelCaliforniaModel findById(UUID id) {
-        return repository.findById(id)
+        HotelCaliforniaModel hotel =  repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Hotel com ID " + id + " não encontrado."));
+    hotel.setCnpj(aplicarMascaraCNPJ(hotel.getCnpj()));
+
+    return hotel;
     }
 
     @Transactional
     public HotelCaliforniaModel create(@Valid HotelCaliforniaModel hotel) {
         validateHotelFields(hotel);
         validateCnpj(hotel);
+        hotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
         return repository.save(hotel);
     }
 
@@ -48,6 +66,7 @@ public class HotelCaliforniaService {
         existingHotel.setLocal(hotel.getLocal());
         existingHotel.setCapacidade(hotel.getCapacidade());
         existingHotel.setCnpj(hotel.getCnpj());
+        existingHotel.setCnpj(removerMascaraCNPJ(existingHotel.getCnpj()));
         return repository.save(existingHotel);
     }
 
@@ -68,6 +87,8 @@ public class HotelCaliforniaService {
 
     private void validateCnpj(HotelCaliforniaModel hotel){
         boolean retorno = false;
+
+        hotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
         // Verifica se é um CNPJ alfanumérico com 12 primeiros caracteres alfanuméricos e 2 últimos numéricos
         String regex = "^[A-Za-z0-9]{12}[0-9]{2}$";
         if (!Pattern.matches(regex, hotel.getCnpj())) {
@@ -131,4 +152,23 @@ public class HotelCaliforniaService {
             throw new IllegalArgumentException("Cnpj Invalido");
         }
     }
+
+    public static String aplicarMascaraCNPJ(String cnpj) {
+        // Verifica se o CNPJ tem 14 caracteres
+        if (cnpj.length() != 14) {
+            throw new IllegalArgumentException("CNPJ deve ter exatamente 14 caracteres");
+        }
+        return cnpj.substring(0, 2) + "." +
+                cnpj.substring(2, 5) + "." +
+                cnpj.substring(5, 8) + "/" +
+                cnpj.substring(8, 12) + "-" +
+                cnpj.substring(12, 14);
+    }
+
+    // Método para remover a máscara do CNPJ
+    public static String removerMascaraCNPJ(String cnpjComMascara) {
+        // Remove todos os caracteres que não são alfanuméricos
+        return cnpjComMascara.replaceAll("[^A-Za-z0-9]", "");
+    }
+
 }
