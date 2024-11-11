@@ -26,16 +26,10 @@ public class HotelCaliforniaService {
         List<HotelCaliforniaModel> hotels = repository.findAll();
 
         for (HotelCaliforniaModel hotel : hotels) {
-            // Remove a máscara, caso o CNPJ já esteja formatado
             String cnpjSemMascara = removerMascaraCNPJ(hotel.getCnpj());
-
-            // Aplica a máscara ao CNPJ
             String cnpjComMascara = aplicarMascaraCNPJ(cnpjSemMascara);
-
-            // Atualiza o CNPJ do hotel com a máscara
             hotel.setCnpj(cnpjComMascara);
         }
-
         return hotels;
     }
 
@@ -88,7 +82,7 @@ public class HotelCaliforniaService {
     }
 
     private void validateCnpj(HotelCaliforniaModel hotel){
-        boolean retorno = false;
+        boolean retorno = true;
 
         hotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
         // Verifica se é um CNPJ alfanumérico com 12 primeiros caracteres alfanuméricos e 2 últimos numéricos
@@ -168,7 +162,7 @@ public class HotelCaliforniaService {
                 cnpj.substring(12, 14);
     }
 
-    // Método para remover a máscara do CNPJ
+   
     public static String removerMascaraCNPJ(String cnpjComMascara) {
         // Remove todos os caracteres que não são alfanuméricos
         return cnpjComMascara.replaceAll("[^A-Za-z0-9]", "");
