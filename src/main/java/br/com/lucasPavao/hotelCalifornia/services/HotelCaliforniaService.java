@@ -33,6 +33,7 @@ public class HotelCaliforniaService {
     @Transactional
     public HotelCaliforniaModel create(@Valid HotelCaliforniaModel hotel) {
         validateHotelFields(hotel);
+        validateCapacidade(hotel.getCapacidade());
         validateCnpj(hotel);
         return repository.save(hotel);
     }
@@ -40,6 +41,7 @@ public class HotelCaliforniaService {
     @Transactional
     public HotelCaliforniaModel update(UUID id,@Valid HotelCaliforniaModel hotel) {
         validateHotelFields(hotel);
+        validateCapacidade(hotel.getCapacidade());
         validateCnpj(hotel);
         HotelCaliforniaModel existingHotel = repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Hotel com ID " + id + " não encontrado."));
@@ -129,6 +131,12 @@ public class HotelCaliforniaService {
 
         if(!retorno){
             throw new IllegalArgumentException("Cnpj Invalido");
+        }
+    }
+
+    private void validateCapacidade(int capacidade){
+        if(capacidade < 0){
+            throw new IllegalArgumentException("Capacidade não pode ser menor que zero!");
         }
     }
 }
