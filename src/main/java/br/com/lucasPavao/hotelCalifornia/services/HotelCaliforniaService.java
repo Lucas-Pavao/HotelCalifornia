@@ -50,6 +50,7 @@ public class HotelCaliforniaService {
     @Transactional
     public HotelCaliforniaModel create(@Valid HotelCaliforniaModel hotel) {
         validateHotelFields(hotel);
+        validateCapacidade(hotel.getCapacidade());
         validateCnpj(hotel);
         hotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
         return repository.save(hotel);
@@ -58,6 +59,7 @@ public class HotelCaliforniaService {
     @Transactional
     public HotelCaliforniaModel update(UUID id,@Valid HotelCaliforniaModel hotel) {
         validateHotelFields(hotel);
+        validateCapacidade(hotel.getCapacidade());
         validateCnpj(hotel);
         HotelCaliforniaModel existingHotel = repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Hotel com ID " + id + " não encontrado."));
@@ -153,6 +155,7 @@ public class HotelCaliforniaService {
         }
     }
 
+
     public static String aplicarMascaraCNPJ(String cnpj) {
         // Verifica se o CNPJ tem 14 caracteres
         if (cnpj.length() != 14) {
@@ -169,6 +172,13 @@ public class HotelCaliforniaService {
     public static String removerMascaraCNPJ(String cnpjComMascara) {
         // Remove todos os caracteres que não são alfanuméricos
         return cnpjComMascara.replaceAll("[^A-Za-z0-9]", "");
+    }
+
+
+    private void validateCapacidade(int capacidade){
+        if(capacidade < 0){
+            throw new IllegalArgumentException("Capacidade não pode ser menor que zero!");
+        }
     }
 
 }
