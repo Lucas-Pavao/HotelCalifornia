@@ -1,6 +1,7 @@
 package br.com.lucasPavao.hotelCalifornia.services;
 
 
+import br.com.lucasPavao.hotelCalifornia.dtos.HotelCaliforniaDto;
 import br.com.lucasPavao.hotelCalifornia.model.HotelCaliforniaModel;
 import br.com.lucasPavao.hotelCalifornia.repository.HotelCaliforniaRepository;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class HotelCaliforniaService {
@@ -21,49 +23,76 @@ public class HotelCaliforniaService {
         this.repository = repository;
     }
 
-    public List<HotelCaliforniaModel> findAll() {
+    public List<HotelCaliforniaDto> findAll() {
 
         List<HotelCaliforniaModel> hotels = repository.findAll();
 
-        for (HotelCaliforniaModel hotel : hotels) {
-            String cnpjSemMascara = removerMascaraCNPJ(hotel.getCnpj());
-            String cnpjComMascara = aplicarMascaraCNPJ(cnpjSemMascara);
-            hotel.setCnpj(cnpjComMascara);
-        }
-        return hotels;
-    }
+        // Aplique a máscara ao CNPJ e converta para DTO
+        return hotels.stream()
+                .map(hotel -> {
+                    String cnpjSemMascara = removerMascaraCNPJ(hotel.getCnpj());
+                    String cnpjComMascara = aplicarMascaraCNPJ(cnpjSemMascara);
+                    hotel.setCnpj(cnpjComMascara);
 
-    public HotelCaliforniaModel findById(UUID id) {
-        HotelCaliforniaModel hotel =  repository.findById(id)
+                    // Converte para DTO e retorna
+                    return HotelCaliforniaDto.convertToDto(hotel);
+                })
+                .collect(Collectors.toList());
+    }
+    public HotelCaliforniaDto findById(UUID id) {
+        HotelCaliforniaModel hotel = repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Hotel com ID " + id + " não encontrado."));
-    hotel.setCnpj(aplicarMascaraCNPJ(hotel.getCnpj()));
 
-    return hotel;
+
+        hotel.setCnpj(aplicarMascaraCNPJ(hotel.getCnpj()));
+
+
+        return HotelCaliforniaDto.convertToDto(hotel);
     }
 
     @Transactional
-    public HotelCaliforniaModel create(@Valid HotelCaliforniaModel hotel) {
+    public HotelCaliforniaDto create(@Valid HotelCaliforniaDto hotelDto) {
+
+        HotelCaliforniaModel hotel = HotelCaliforniaDto.convertToModel(hotelDto);
+
+
         validateHotelFields(hotel);
         validateCapacidade(hotel.getCapacidade());
         validateCnpj(hotel);
+
+
         hotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
-        return repository.save(hotel);
+        HotelCaliforniaModel savedHotel = repository.save(hotel);
+
+
+        return HotelCaliforniaDto.convertToDto(savedHotel);
     }
 
     @Transactional
-    public HotelCaliforniaModel update(UUID id,@Valid HotelCaliforniaModel hotel) {
+    public HotelCaliforniaDto update(UUID id, @Valid HotelCaliforniaDto hotelDto) {
+
+        HotelCaliforniaModel hotel = HotelCaliforniaDto.convertToModel(hotelDto);
+
+
         validateHotelFields(hotel);
         validateCapacidade(hotel.getCapacidade());
         validateCnpj(hotel);
+
+
         HotelCaliforniaModel existingHotel = repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Hotel com ID " + id + " não encontrado."));
+
 
         existingHotel.setName(hotel.getName());
         existingHotel.setLocal(hotel.getLocal());
         existingHotel.setCapacidade(hotel.getCapacidade());
-        existingHotel.setCnpj(hotel.getCnpj());
-        existingHotel.setCnpj(removerMascaraCNPJ(existingHotel.getCnpj()));
-        return repository.save(existingHotel);
+        existingHotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
+
+
+        HotelCaliforniaModel updatedHotel = repository.save(existingHotel);
+
+
+        return HotelCaliforniaDto.convertToDto(updatedHotel);
     }
 
     @Transactional
@@ -73,6 +102,7 @@ public class HotelCaliforniaService {
         }
         repository.deleteById(id);
     }
+
 
     private void validateHotelFields(HotelCaliforniaModel hotel) {
         if (hotel.getName() == null || hotel.getLocal() == null ||
