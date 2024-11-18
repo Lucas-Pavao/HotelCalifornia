@@ -29,10 +29,10 @@ public class HotelCaliforniaDto {
     @Pattern(regexp = "\\d{14}", message = "O CNPJ deve conter exatamente 14 dígitos")
     private String cnpj;
 
-    // Construtor padrão
+
     public HotelCaliforniaDto() {}
 
-    // Construtor completo para facilitar a criação do DTO
+
     public   HotelCaliforniaDto(UUID id, String name, String local, Integer capacidade, String cnpj) {
         this.id = id;
         this.name = name;
@@ -62,7 +62,7 @@ public class HotelCaliforniaDto {
     }
 
 
-    // Getters e Setters
+
     public UUID getId() {
         return id;
     }
