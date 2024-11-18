@@ -33,6 +33,12 @@ public class HotelCaliforniaController {
         return ResponseEntity.ok(service.findById(id));
     }
 
+    @GetMapping("getByCnpj/{cnpj}")
+    public ResponseEntity<HotelCaliforniaDto> getHotelByCnpj(@PathVariable String cnpj) {
+
+        return ResponseEntity.ok(service.findByCnpj(cnpj));
+    }
+
     @PostMapping
     public ResponseEntity<HotelCaliforniaDto> createHotel(@Valid @NotNull @RequestBody HotelCaliforniaDto hotel) {
 
