@@ -23,7 +23,7 @@ public class HotelCaliforniaModel {
     @Id
     @Column(columnDefinition = "UUID")
     @NotNull
-    private UUID id = UUID.randomUUID();
+    private UUID id;
 
     @Column(name = "name")
     @NotNull

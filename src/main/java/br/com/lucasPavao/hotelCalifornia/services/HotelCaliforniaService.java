@@ -60,7 +60,7 @@ public class HotelCaliforniaService {
         validateCapacidade(hotel.getCapacidade());
         validateCnpj(hotel);
 
-
+        hotel.setId(UUID.randomUUID());
         hotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
         HotelCaliforniaModel savedHotel = repository.save(hotel);
 
