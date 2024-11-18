@@ -50,6 +50,18 @@ public class HotelCaliforniaService {
         return HotelCaliforniaDto.convertToDto(hotel);
     }
 
+    public HotelCaliforniaDto findByCnpj(String cnpj){
+
+        HotelCaliforniaModel hotel =
+                repository.findByCnpj(removerMascaraCNPJ(cnpj))
+                .orElseThrow(() -> new NoSuchElementException("Hotel com cnpj " + aplicarMascaraCNPJ(cnpj) + " não encontrado."));
+
+        hotel.setCnpj(aplicarMascaraCNPJ(hotel.getCnpj()));
+
+        return HotelCaliforniaDto.convertToDto(hotel);
+    }
+
+
     @Transactional
     public HotelCaliforniaDto create(@Valid HotelCaliforniaDto hotelDto) {
 
@@ -180,7 +192,7 @@ public class HotelCaliforniaService {
     }
 
 
-    public static String aplicarMascaraCNPJ(String cnpj) {
+    public  String aplicarMascaraCNPJ(String cnpj) {
 
         if (cnpj.length() != 14) {
             throw new IllegalArgumentException("CNPJ deve ter exatamente 14 caracteres");
@@ -193,7 +205,7 @@ public class HotelCaliforniaService {
     }
 
    
-    public static String removerMascaraCNPJ(String cnpjComMascara) {
+    public  String removerMascaraCNPJ(String cnpjComMascara) {
 
         return cnpjComMascara.replaceAll("[^A-Za-z0-9]", "");
     }
