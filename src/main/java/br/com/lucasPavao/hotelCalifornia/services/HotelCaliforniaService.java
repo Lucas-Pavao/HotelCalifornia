@@ -27,14 +27,14 @@ public class HotelCaliforniaService {
 
         List<HotelCaliforniaModel> hotels = repository.findAll();
 
-        // Aplique a máscara ao CNPJ e converta para DTO
+
         return hotels.stream()
                 .map(hotel -> {
                     String cnpjSemMascara = removerMascaraCNPJ(hotel.getCnpj());
                     String cnpjComMascara = aplicarMascaraCNPJ(cnpjSemMascara);
                     hotel.setCnpj(cnpjComMascara);
 
-                    // Converte para DTO e retorna
+
                     return HotelCaliforniaDto.convertToDto(hotel);
                 })
                 .collect(Collectors.toList());
@@ -115,13 +115,13 @@ public class HotelCaliforniaService {
         boolean retorno = true;
 
         hotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
-        // Verifica se é um CNPJ alfanumérico com 12 primeiros caracteres alfanuméricos e 2 últimos numéricos
+
         String regex = "^[A-Za-z0-9]{12}[0-9]{2}$";
         if (!Pattern.matches(regex, hotel.getCnpj())) {
             retorno = false;
         }
 
-        // Verifica se é uma sequência repetida de caracteres
+
         if (hotel.getCnpj().equals("00000000000000") || hotel.getCnpj().equals("11111111111111") ||
                 hotel.getCnpj().equals("22222222222222") || hotel.getCnpj().equals("33333333333333") ||
                 hotel.getCnpj().equals("44444444444444") || hotel.getCnpj().equals("55555555555555") ||
@@ -130,7 +130,7 @@ public class HotelCaliforniaService {
             retorno = false;
         }
 
-        // Conversão de caracteres para seus valores ASCII ajustados (alfanuméricos)
+
         int[] valores = new int[12];
 
         for (int i = 0; i < 12; i++) {
@@ -142,7 +142,7 @@ public class HotelCaliforniaService {
             }
         }
 
-        // Cálculo do primeiro dígito verificador (13º dígito)
+
         int peso = 5; // Pesos começam em 5
         int soma = 0;
         for (int i = 0; i < 12; i++) {
@@ -156,8 +156,8 @@ public class HotelCaliforniaService {
         int resto = soma % 11;
         char dig13 = (resto < 2) ? '0' : (char) (11 - resto + '0');
 
-        // Cálculo do segundo dígito verificador (14º dígito)
-        peso = 6; // Pesos começam em 6 para o segundo dígito
+
+        peso = 6;
         soma = 0;
         for (int i = 0; i < 12; i++) {
             soma += valores[i] * peso;
@@ -167,11 +167,11 @@ public class HotelCaliforniaService {
             }
         }
 
-        soma += (dig13 - '0') * 2; // Inclui o primeiro dígito verificador no cálculo
+        soma += (dig13 - '0') * 2;
         resto = soma % 11;
         char dig14 = (resto < 2) ? '0' : (char) (11 - resto + '0');
 
-        // Verifica se os dígitos verificadores calculados coincidem com os últimos 2 dígitos
+
         retorno = dig13 == hotel.getCnpj().charAt(12) && dig14 == hotel.getCnpj().charAt(13);
 
         if(!retorno){
@@ -181,7 +181,7 @@ public class HotelCaliforniaService {
 
 
     public static String aplicarMascaraCNPJ(String cnpj) {
-        // Verifica se o CNPJ tem 14 caracteres
+
         if (cnpj.length() != 14) {
             throw new IllegalArgumentException("CNPJ deve ter exatamente 14 caracteres");
         }
@@ -194,7 +194,7 @@ public class HotelCaliforniaService {
 
    
     public static String removerMascaraCNPJ(String cnpjComMascara) {
-        // Remove todos os caracteres que não são alfanuméricos
+
         return cnpjComMascara.replaceAll("[^A-Za-z0-9]", "");
     }
 
