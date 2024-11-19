@@ -115,6 +115,12 @@ public class HotelCaliforniaService {
         repository.deleteById(id);
     }
 
+    @Transactional
+    public void deleteByCnpj(String cnpj){
+        repository.findByCnpj(cnpj).orElseThrow(() -> new NoSuchElementException("Hotel com CNPJ " + cnpj + " não encontrado."));
+        repository.deleteByCnpj(cnpj);
+    }
+
 
     private void validateHotelFields(HotelCaliforniaModel hotel) {
         if (hotel.getName() == null || hotel.getLocal() == null ||
