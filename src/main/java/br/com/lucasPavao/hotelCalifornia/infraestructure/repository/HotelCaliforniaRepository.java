@@ -1,4 +1,4 @@
-package br.com.lucasPavao.hotelCalifornia.infraestructure.model.repository;
+package br.com.lucasPavao.hotelCalifornia.infraestructure.repository;
 
 import java.util.Optional;
 import java.util.UUID;
