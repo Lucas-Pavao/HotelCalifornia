@@ -1,10 +1,10 @@
-package br.com.lucasPavao.hotelCalifornia.api;
+package br.com.lucasPavao.hotelCalifornia.api.controllers;
 
 import java.util.List;
 import java.util.UUID;
 
-import br.com.lucasPavao.hotelCalifornia.dtos.HotelCaliforniaDto;
-import br.com.lucasPavao.hotelCalifornia.services.HotelCaliforniaService;
+import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaDto;
+import br.com.lucasPavao.hotelCalifornia.domain.services.HotelCaliforniaService;
 import com.sun.istack.NotNull;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;

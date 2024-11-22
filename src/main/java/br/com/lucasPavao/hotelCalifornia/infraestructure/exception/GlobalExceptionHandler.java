@@ -1,4 +1,4 @@
-package br.com.lucasPavao.hotelCalifornia.exception;
+package br.com.lucasPavao.hotelCalifornia.infraestructure.model.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

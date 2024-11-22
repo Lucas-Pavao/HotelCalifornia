@@ -1,4 +1,4 @@
-package br.com.lucasPavao.hotelCalifornia.model;
+package br.com.lucasPavao.hotelCalifornia.infraestructure.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
