@@ -2,6 +2,8 @@ package br.com.lucasPavao.hotelCalifornia.domain.services;
 
 
 import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaDto;
+import br.com.lucasPavao.hotelCalifornia.domain.converter.GenericConverter;
+import br.com.lucasPavao.hotelCalifornia.domain.converter.HotelConverter;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.model.HotelCaliforniaModel;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.model.repository.HotelCaliforniaRepository;
 import org.springframework.stereotype.Service;
@@ -18,9 +20,12 @@ import java.util.stream.Collectors;
 public class HotelCaliforniaService {
 
     private final HotelCaliforniaRepository repository;
+    private final GenericConverter<HotelCaliforniaDto, HotelCaliforniaModel> converter;
 
-    public HotelCaliforniaService(HotelCaliforniaRepository repository) {
+    public HotelCaliforniaService(HotelCaliforniaRepository repository, GenericConverter<HotelCaliforniaDto, HotelCaliforniaModel> converter) {
+
         this.repository = repository;
+        this.converter = converter;
     }
 
     public List<HotelCaliforniaDto> findAll() {
@@ -35,7 +40,7 @@ public class HotelCaliforniaService {
                     hotel.setCnpj(cnpjComMascara);
 
 
-                    return HotelCaliforniaDto.convertToDto(hotel);
+                    return converter.convertToDto(hotel);
                 })
                 .collect(Collectors.toList());
     }
@@ -47,7 +52,7 @@ public class HotelCaliforniaService {
         hotel.setCnpj(aplicarMascaraCNPJ(hotel.getCnpj()));
 
 
-        return HotelCaliforniaDto.convertToDto(hotel);
+        return converter.convertToDto(hotel);
     }
 
     public HotelCaliforniaDto findByCnpj(String cnpj){
@@ -58,14 +63,14 @@ public class HotelCaliforniaService {
 
         hotel.setCnpj(aplicarMascaraCNPJ(hotel.getCnpj()));
 
-        return HotelCaliforniaDto.convertToDto(hotel);
+        return converter.convertToDto(hotel);
     }
 
 
     @Transactional
     public HotelCaliforniaDto create(@Valid HotelCaliforniaDto hotelDto) {
 
-        HotelCaliforniaModel hotel = HotelCaliforniaDto.convertToModel(hotelDto);
+        HotelCaliforniaModel hotel = converter.convertToModel(hotelDto);
 
 
         validateHotelFields(hotel);
@@ -77,13 +82,13 @@ public class HotelCaliforniaService {
         HotelCaliforniaModel savedHotel = repository.save(hotel);
 
 
-        return HotelCaliforniaDto.convertToDto(savedHotel);
+        return converter.convertToDto(savedHotel);
     }
 
     @Transactional
     public HotelCaliforniaDto update(UUID id, @Valid HotelCaliforniaDto hotelDto) {
 
-        HotelCaliforniaModel hotel = HotelCaliforniaDto.convertToModel(hotelDto);
+        HotelCaliforniaModel hotel = converter.convertToModel(hotelDto);
 
 
         validateHotelFields(hotel);
@@ -104,7 +109,7 @@ public class HotelCaliforniaService {
         HotelCaliforniaModel updatedHotel = repository.save(existingHotel);
 
 
-        return HotelCaliforniaDto.convertToDto(updatedHotel);
+        return converter.convertToDto(updatedHotel);
     }
 
     @Transactional
