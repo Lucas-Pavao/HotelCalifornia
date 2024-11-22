@@ -16,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 public interface HotelCaliforniaRepository extends JpaRepository<HotelCaliforniaModel, UUID>{
 
     @Query(value = "SELECT * FROM HOTEL_CALIFORNIA WHERE cnpj = :cnpj", nativeQuery = true)
-    public Optional<HotelCaliforniaModel> findByCnpj(@Param("cnpj") String cnpj);
+    Optional<HotelCaliforniaModel> findByCnpj(@Param("cnpj") String cnpj);
 
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM HOTEL_CALIFORNIA WHERE cnpj = :cnpj", nativeQuery = true)
-    public void deleteByCnpj(@Param("cnpj") String cnpj);
+     void deleteByCnpj(@Param("cnpj") String cnpj);
 }

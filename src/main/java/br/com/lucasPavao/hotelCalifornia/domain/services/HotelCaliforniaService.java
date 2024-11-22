@@ -3,7 +3,8 @@ package br.com.lucasPavao.hotelCalifornia.domain.services;
 
 import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaDto;
 import br.com.lucasPavao.hotelCalifornia.domain.converter.GenericConverter;
-import br.com.lucasPavao.hotelCalifornia.domain.converter.HotelConverter;
+import br.com.lucasPavao.hotelCalifornia.infraestructure.exception.HotelNotFoundException;
+import br.com.lucasPavao.hotelCalifornia.infraestructure.exception.InvalidCnpjException;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.model.HotelCaliforniaModel;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.repository.HotelCaliforniaRepository;
 import org.slf4j.Logger;
@@ -16,7 +17,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -66,7 +66,7 @@ public class HotelCaliforniaService {
             HotelCaliforniaModel hotel = repository.findById(id)
                     .orElseThrow(() -> {
                         logger.warn("Hotel com ID {} não encontrado", id);
-                        return new NoSuchElementException("Hotel com ID " + id + " não encontrado.");
+                        return new HotelNotFoundException("Hotel com ID " + id + " não encontrado.");
                     });
 
             hotel.setCnpj(aplicarMascaraCNPJ(hotel.getCnpj()));
@@ -92,7 +92,7 @@ public class HotelCaliforniaService {
                     .orElseThrow(() -> {
                         String cnpjComMascara = aplicarMascaraCNPJ(cnpjSemMascara);
                         logger.warn("Hotel com CNPJ {} não encontrado", cnpjComMascara);
-                        return new NoSuchElementException("Hotel com CNPJ " + cnpjComMascara + " não encontrado.");
+                        return new HotelNotFoundException("Hotel com CNPJ " + cnpjComMascara + " não encontrado.");
                     });
 
             hotel.setCnpj(aplicarMascaraCNPJ(hotel.getCnpj()));
@@ -146,7 +146,7 @@ public class HotelCaliforniaService {
 
 
             HotelCaliforniaModel existingHotel = repository.findById(id)
-                    .orElseThrow(() -> new NoSuchElementException("Hotel com ID " + id + " não encontrado."));
+                    .orElseThrow(() -> new HotelNotFoundException("Hotel com ID " + id + " não encontrado."));
 
 
             existingHotel.setName(hotel.getName());
@@ -174,7 +174,7 @@ public class HotelCaliforniaService {
     public void delete(UUID id) {
         try {
             if (!repository.existsById(id)) {
-                throw new NoSuchElementException("Hotel com ID " + id + " não encontrado.");
+                throw new HotelNotFoundException("Hotel com ID " + id + " não encontrado.");
             }
             repository.deleteById(id);
             logger.info("Hotel com ID {} excluído com sucesso", id);
@@ -187,9 +187,9 @@ public class HotelCaliforniaService {
     @Transactional
     public void deleteByCnpj(String cnpj){
         try {
-            repository.findByCnpj(cnpj).orElseThrow(() -> new NoSuchElementException("Hotel com CNPJ " + cnpj + " não encontrado."));
+            repository.findByCnpj(cnpj).orElseThrow(() -> new HotelNotFoundException("Hotel com CNPJ " + cnpj + " não encontrado."));
             repository.deleteByCnpj(cnpj);
-            logger.info("Hotel com ID {} excluído com sucesso", cnpj);
+            logger.info("Hotel com CNPJ {} excluído com sucesso", cnpj);
         } catch (DataAccessException ex) {
             logger.error("Erro ao acessar o banco de dados durante a exclusão do hotel", ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao excluir o hotel no banco de dados", ex);
@@ -206,69 +206,72 @@ public class HotelCaliforniaService {
 
     private void validateCnpj(HotelCaliforniaModel hotel){
         boolean retorno = true;
+    try {
+         hotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
 
-        hotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
-
-        String regex = "^[A-Za-z0-9]{12}[0-9]{2}$";
-        if (!Pattern.matches(regex, hotel.getCnpj())) {
-            retorno = false;
-        }
-
-
-        if (hotel.getCnpj().equals("00000000000000") || hotel.getCnpj().equals("11111111111111") ||
-                hotel.getCnpj().equals("22222222222222") || hotel.getCnpj().equals("33333333333333") ||
-                hotel.getCnpj().equals("44444444444444") || hotel.getCnpj().equals("55555555555555") ||
-                hotel.getCnpj().equals("66666666666666") || hotel.getCnpj().equals("77777777777777") ||
-                hotel.getCnpj().equals("88888888888888") || hotel.getCnpj().equals("99999999999999")) {
-            retorno = false;
-        }
+         String regex = "^[A-Za-z0-9]{12}[0-9]{2}$";
+         if (!Pattern.matches(regex, hotel.getCnpj())) {
+             retorno = false;
+         }
 
 
-        int[] valores = new int[12];
-
-        for (int i = 0; i < 12; i++) {
-            char c = hotel.getCnpj().charAt(i);
-            if (Character.isDigit(c)) {
-                valores[i] = c - '0'; // Para números (0-9)
-            } else if (Character.isLetter(c)) {
-                valores[i] = c - 'A' + 17; // Para letras (A-Z), ajustado conforme regras
-            }
-        }
+         if (hotel.getCnpj().equals("00000000000000") || hotel.getCnpj().equals("11111111111111") ||
+                 hotel.getCnpj().equals("22222222222222") || hotel.getCnpj().equals("33333333333333") ||
+                 hotel.getCnpj().equals("44444444444444") || hotel.getCnpj().equals("55555555555555") ||
+                 hotel.getCnpj().equals("66666666666666") || hotel.getCnpj().equals("77777777777777") ||
+                 hotel.getCnpj().equals("88888888888888") || hotel.getCnpj().equals("99999999999999")) {
+             retorno = false;
+         }
 
 
-        int peso = 5; // Pesos começam em 5
-        int soma = 0;
-        for (int i = 0; i < 12; i++) {
-            soma += valores[i] * peso;
-            peso--;
-            if (peso < 2) {
-                peso = 9;
-            }
-        }
+         int[] valores = new int[12];
 
-        int resto = soma % 11;
-        char dig13 = (resto < 2) ? '0' : (char) (11 - resto + '0');
+         for (int i = 0; i < 12; i++) {
+             char c = hotel.getCnpj().charAt(i);
+             if (Character.isDigit(c)) {
+                 valores[i] = c - '0'; // Para números (0-9)
+             } else if (Character.isLetter(c)) {
+                 valores[i] = c - 'A' + 17; // Para letras (A-Z), ajustado conforme regras
+             }
+         }
 
 
-        peso = 6;
-        soma = 0;
-        for (int i = 0; i < 12; i++) {
-            soma += valores[i] * peso;
-            peso--;
-            if (peso < 2) {
-                peso = 9;
-            }
-        }
+         int peso = 5; // Pesos começam em 5
+         int soma = 0;
+         for (int i = 0; i < 12; i++) {
+             soma += valores[i] * peso;
+             peso--;
+             if (peso < 2) {
+                 peso = 9;
+             }
+         }
 
-        soma += (dig13 - '0') * 2;
-        resto = soma % 11;
-        char dig14 = (resto < 2) ? '0' : (char) (11 - resto + '0');
+         int resto = soma % 11;
+         char dig13 = (resto < 2) ? '0' : (char) (11 - resto + '0');
 
 
-        retorno = dig13 == hotel.getCnpj().charAt(12) && dig14 == hotel.getCnpj().charAt(13);
+         peso = 6;
+         soma = 0;
+         for (int i = 0; i < 12; i++) {
+             soma += valores[i] * peso;
+             peso--;
+             if (peso < 2) {
+                 peso = 9;
+             }
+         }
 
-        if(!retorno){
-            throw new IllegalArgumentException("Cnpj Invalido");
+         soma += (dig13 - '0') * 2;
+         resto = soma % 11;
+         char dig14 = (resto < 2) ? '0' : (char) (11 - resto + '0');
+
+
+         retorno = dig13 == hotel.getCnpj().charAt(12) && dig14 == hotel.getCnpj().charAt(13);
+
+         if (!retorno) {
+             throw new IllegalArgumentException("Cnpj Invalido");
+         }
+        } catch (IllegalArgumentException ex) {
+            throw new InvalidCnpjException("CNPJ inválido: " + ex.getMessage());
         }
     }
 
