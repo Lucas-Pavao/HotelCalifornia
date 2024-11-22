@@ -41,27 +41,6 @@ public class HotelCaliforniaDto {
         this.cnpj = cnpj;
     }
 
-    public static HotelCaliforniaDto convertToDto(HotelCaliforniaModel hotelModel) {
-        return new HotelCaliforniaDto(
-                hotelModel.getId(),
-                hotelModel.getName(),
-                hotelModel.getLocal(),
-                hotelModel.getCapacidade(),
-                hotelModel.getCnpj()
-        );
-    }
-
-    public static HotelCaliforniaModel convertToModel(HotelCaliforniaDto hotelDto) {
-        return HotelCaliforniaModel.builder()
-                .id(hotelDto.getId())
-                .name(hotelDto.getName())
-                .local(hotelDto.getLocal())
-                .capacidade(hotelDto.getCapacidade())
-                .cnpj(hotelDto.getCnpj())
-                .build();
-    }
-
-
 
     public UUID getId() {
         return id;
