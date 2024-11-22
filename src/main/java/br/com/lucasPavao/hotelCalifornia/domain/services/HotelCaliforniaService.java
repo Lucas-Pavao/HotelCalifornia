@@ -1,9 +1,9 @@
-package br.com.lucasPavao.hotelCalifornia.services;
+package br.com.lucasPavao.hotelCalifornia.domain.services;
 
 
-import br.com.lucasPavao.hotelCalifornia.dtos.HotelCaliforniaDto;
-import br.com.lucasPavao.hotelCalifornia.model.HotelCaliforniaModel;
-import br.com.lucasPavao.hotelCalifornia.repository.HotelCaliforniaRepository;
+import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaDto;
+import br.com.lucasPavao.hotelCalifornia.infraestructure.model.HotelCaliforniaModel;
+import br.com.lucasPavao.hotelCalifornia.infraestructure.model.repository.HotelCaliforniaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,6 +1,6 @@
-package br.com.lucasPavao.hotelCalifornia.dtos;
+package br.com.lucasPavao.hotelCalifornia.api.dtos;
 
-import br.com.lucasPavao.hotelCalifornia.model.HotelCaliforniaModel;
+import br.com.lucasPavao.hotelCalifornia.infraestructure.model.HotelCaliforniaModel;
 
 import javax.validation.constraints.*;
 import java.util.UUID;
