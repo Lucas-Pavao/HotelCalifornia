@@ -8,9 +8,6 @@ import java.util.UUID;
 public class HotelCaliforniaDto {
 
     @NotNull
-    private UUID id;
-
-    @NotNull
     @NotBlank(message = "Nome do hotel é obrigatório")
     @Size(max = 100, message = "O nome do hotel não pode ter mais que 100 caracteres")
     private String name;
@@ -33,21 +30,12 @@ public class HotelCaliforniaDto {
     public HotelCaliforniaDto() {}
 
 
-    public   HotelCaliforniaDto(UUID id, String name, String local, Integer capacidade, String cnpj) {
-        this.id = id;
+    public   HotelCaliforniaDto(String name, String local, Integer capacidade, String cnpj) {
+
         this.name = name;
         this.local = local;
         this.capacidade = capacidade;
         this.cnpj = cnpj;
-    }
-
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     public String getName() {
