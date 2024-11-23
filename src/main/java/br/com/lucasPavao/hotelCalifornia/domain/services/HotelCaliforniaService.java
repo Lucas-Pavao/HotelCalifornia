@@ -2,9 +2,9 @@ package br.com.lucasPavao.hotelCalifornia.domain.services;
 
 
 import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaDto;
+import br.com.lucasPavao.hotelCalifornia.domain.Utils.CnpjUtils;
 import br.com.lucasPavao.hotelCalifornia.domain.converter.GenericConverter;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.exception.HotelNotFoundException;
-import br.com.lucasPavao.hotelCalifornia.infraestructure.exception.InvalidCnpjException;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.model.HotelCaliforniaModel;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.repository.HotelCaliforniaRepository;
 import org.slf4j.Logger;
@@ -18,8 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 
 @Service
 public class HotelCaliforniaService {
@@ -44,8 +44,8 @@ public class HotelCaliforniaService {
 
             return hotels.stream()
                     .map(hotel -> {
-                        String cnpjSemMascara = removerMascaraCNPJ(hotel.getCnpj());
-                        String cnpjComMascara = aplicarMascaraCNPJ(cnpjSemMascara);
+                        String cnpjSemMascara = CnpjUtils.removerMascaraCNPJ(hotel.getCnpj());
+                        String cnpjComMascara = CnpjUtils.aplicarMascaraCNPJ(cnpjSemMascara);
                         hotel.setCnpj(cnpjComMascara);
                         return converter.convertToDto(hotel);
                     })
@@ -69,7 +69,7 @@ public class HotelCaliforniaService {
                         return new HotelNotFoundException("Hotel com ID " + id + " não encontrado.");
                     });
 
-            hotel.setCnpj(aplicarMascaraCNPJ(hotel.getCnpj()));
+            hotel.setCnpj(CnpjUtils.aplicarMascaraCNPJ(hotel.getCnpj()));
 
             logger.info("Hotel com ID {} encontrado", id);
             return converter.convertToDto(hotel);
@@ -86,16 +86,16 @@ public class HotelCaliforniaService {
         logger.info("Iniciando busca de hotel com CNPJ: {}", cnpj);
 
         try {
-            String cnpjSemMascara = removerMascaraCNPJ(cnpj);
+            String cnpjSemMascara = CnpjUtils.removerMascaraCNPJ(cnpj);
 
             HotelCaliforniaModel hotel = repository.findByCnpj(cnpjSemMascara)
                     .orElseThrow(() -> {
-                        String cnpjComMascara = aplicarMascaraCNPJ(cnpjSemMascara);
+                        String cnpjComMascara = CnpjUtils.aplicarMascaraCNPJ(cnpjSemMascara);
                         logger.warn("Hotel com CNPJ {} não encontrado", cnpjComMascara);
                         return new HotelNotFoundException("Hotel com CNPJ " + cnpjComMascara + " não encontrado.");
                     });
 
-            hotel.setCnpj(aplicarMascaraCNPJ(hotel.getCnpj()));
+            hotel.setCnpj(CnpjUtils.aplicarMascaraCNPJ(hotel.getCnpj()));
 
             logger.info("Hotel com CNPJ {} encontrado", cnpj);
             return converter.convertToDto(hotel);
@@ -115,10 +115,10 @@ public class HotelCaliforniaService {
 
             validateHotelFields(hotel);
             validateCapacidade(hotel.getCapacidade());
-            validateCnpj(hotel);
+            CnpjUtils.validate(hotel.getCnpj());
 
             hotel.setId(UUID.randomUUID());
-            hotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
+            hotel.setCnpj(CnpjUtils.removerMascaraCNPJ(hotel.getCnpj()));
             HotelCaliforniaModel savedHotel = repository.save(hotel);
             logger.info("Hotel criado com sucesso: {}", savedHotel);
 
@@ -142,7 +142,7 @@ public class HotelCaliforniaService {
 
             validateHotelFields(hotel);
             validateCapacidade(hotel.getCapacidade());
-            validateCnpj(hotel);
+            CnpjUtils.validate(hotel.getCnpj());
 
 
             HotelCaliforniaModel existingHotel = repository.findById(id)
@@ -152,7 +152,7 @@ public class HotelCaliforniaService {
             existingHotel.setName(hotel.getName());
             existingHotel.setLocal(hotel.getLocal());
             existingHotel.setCapacidade(hotel.getCapacidade());
-            existingHotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
+            existingHotel.setCnpj(CnpjUtils.removerMascaraCNPJ(hotel.getCnpj()));
 
 
             HotelCaliforniaModel updatedHotel = repository.save(existingHotel);
@@ -204,95 +204,7 @@ public class HotelCaliforniaService {
         }
     }
 
-    private void validateCnpj(HotelCaliforniaModel hotel){
-        boolean retorno = true;
-    try {
-         hotel.setCnpj(removerMascaraCNPJ(hotel.getCnpj()));
 
-         String regex = "^[A-Za-z0-9]{12}[0-9]{2}$";
-         if (!Pattern.matches(regex, hotel.getCnpj())) {
-             retorno = false;
-         }
-
-
-         if (hotel.getCnpj().equals("00000000000000") || hotel.getCnpj().equals("11111111111111") ||
-                 hotel.getCnpj().equals("22222222222222") || hotel.getCnpj().equals("33333333333333") ||
-                 hotel.getCnpj().equals("44444444444444") || hotel.getCnpj().equals("55555555555555") ||
-                 hotel.getCnpj().equals("66666666666666") || hotel.getCnpj().equals("77777777777777") ||
-                 hotel.getCnpj().equals("88888888888888") || hotel.getCnpj().equals("99999999999999")) {
-             retorno = false;
-         }
-
-
-         int[] valores = new int[12];
-
-         for (int i = 0; i < 12; i++) {
-             char c = hotel.getCnpj().charAt(i);
-             if (Character.isDigit(c)) {
-                 valores[i] = c - '0'; // Para números (0-9)
-             } else if (Character.isLetter(c)) {
-                 valores[i] = c - 'A' + 17; // Para letras (A-Z), ajustado conforme regras
-             }
-         }
-
-
-         int peso = 5; // Pesos começam em 5
-         int soma = 0;
-         for (int i = 0; i < 12; i++) {
-             soma += valores[i] * peso;
-             peso--;
-             if (peso < 2) {
-                 peso = 9;
-             }
-         }
-
-         int resto = soma % 11;
-         char dig13 = (resto < 2) ? '0' : (char) (11 - resto + '0');
-
-
-         peso = 6;
-         soma = 0;
-         for (int i = 0; i < 12; i++) {
-             soma += valores[i] * peso;
-             peso--;
-             if (peso < 2) {
-                 peso = 9;
-             }
-         }
-
-         soma += (dig13 - '0') * 2;
-         resto = soma % 11;
-         char dig14 = (resto < 2) ? '0' : (char) (11 - resto + '0');
-
-
-         retorno = dig13 == hotel.getCnpj().charAt(12) && dig14 == hotel.getCnpj().charAt(13);
-
-         if (!retorno) {
-             throw new IllegalArgumentException("Cnpj Invalido");
-         }
-        } catch (IllegalArgumentException ex) {
-            throw new InvalidCnpjException("CNPJ inválido: " + ex.getMessage());
-        }
-    }
-
-
-    public  String aplicarMascaraCNPJ(String cnpj) {
-
-        if (cnpj.length() != 14) {
-            throw new IllegalArgumentException("CNPJ deve ter exatamente 14 caracteres");
-        }
-        return cnpj.substring(0, 2) + "." +
-                cnpj.substring(2, 5) + "." +
-                cnpj.substring(5, 8) + "/" +
-                cnpj.substring(8, 12) + "-" +
-                cnpj.substring(12, 14);
-    }
-
-
-    public  String removerMascaraCNPJ(String cnpjComMascara) {
-
-        return cnpjComMascara.replaceAll("[^A-Za-z0-9]", "");
-    }
 
 
     private void validateCapacidade(int capacidade){

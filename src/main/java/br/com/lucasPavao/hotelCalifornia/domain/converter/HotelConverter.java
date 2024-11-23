@@ -12,7 +12,6 @@ public class HotelConverter  implements GenericConverter<HotelCaliforniaDto, Hot
             return null;
         }
         return new HotelCaliforniaDto(
-                hotelModel.getId(),
                 hotelModel.getName(),
                 hotelModel.getLocal(),
                 hotelModel.getCapacidade(),
@@ -26,7 +25,6 @@ public class HotelConverter  implements GenericConverter<HotelCaliforniaDto, Hot
             return null;
         }
         return HotelCaliforniaModel.builder()
-                .id(hotelDto.getId())
                 .name(hotelDto.getName())
                 .local(hotelDto.getLocal())
                 .capacidade(hotelDto.getCapacidade())
