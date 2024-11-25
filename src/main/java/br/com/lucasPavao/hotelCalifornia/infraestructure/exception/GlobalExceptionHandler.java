@@ -55,4 +55,14 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+
+    @ExceptionHandler(CnpjExistsException.class)
+    public ResponseEntity<ErrorResponse> handleCnpjExistsException(CnpjExistsException ex) {
+        ErrorResponse response = new ErrorResponse(
+                "Bad Request",
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.value()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 }
