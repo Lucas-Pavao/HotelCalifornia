@@ -11,14 +11,14 @@ public class CnpjUtils {
           isValid(cnpj);
      }
 
-    private static boolean isValid(String cnpj){
-        boolean retorno = true;
+    private static void isValid(String cnpj){
+
         try {
             cnpj = removerMascaraCNPJ(cnpj);
 
             String regex = "^[A-Za-z0-9]{12}[0-9]{2}$";
             if (!Pattern.matches(regex, cnpj)) {
-                retorno = false;
+                throw new InvalidCnpjException("CNPJ inválido: deve conter apenas 14 dígitos numéricos.");
             }
 
 
@@ -27,7 +27,7 @@ public class CnpjUtils {
                     cnpj.equals("44444444444444") || cnpj.equals("55555555555555") ||
                     cnpj.equals("66666666666666") || cnpj.equals("77777777777777") ||
                     cnpj.equals("88888888888888") || cnpj.equals("99999999999999")) {
-                retorno = false;
+                throw new InvalidCnpjException("CNPJ inválido: Cnpj com valores repitidos!");
             }
 
 
@@ -72,15 +72,15 @@ public class CnpjUtils {
             char dig14 = (resto < 2) ? '0' : (char) (11 - resto + '0');
 
 
-            retorno = dig13 == cnpj.charAt(12) && dig14 == cnpj.charAt(13);
+           boolean valid = dig13 == cnpj.charAt(12) && dig14 == cnpj.charAt(13);
 
-            if (!retorno) {
-                throw new IllegalArgumentException("Cnpj Invalido");
+            if (!valid) {
+                throw new InvalidCnpjException("Cnpj Invalido");
             }
         } catch (IllegalArgumentException ex) {
             throw new InvalidCnpjException("CNPJ inválido: " + ex.getMessage());
         }
-        return retorno;
+
     }
 
 

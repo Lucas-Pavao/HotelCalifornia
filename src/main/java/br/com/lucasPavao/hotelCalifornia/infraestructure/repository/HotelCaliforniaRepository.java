@@ -22,4 +22,6 @@ public interface HotelCaliforniaRepository extends JpaRepository<HotelCalifornia
     @Transactional
     @Query(value = "DELETE FROM HOTEL_CALIFORNIA WHERE cnpj = :cnpj", nativeQuery = true)
      void deleteByCnpj(@Param("cnpj") String cnpj);
+
+    boolean existsByCnpj(String cnpj);
 }

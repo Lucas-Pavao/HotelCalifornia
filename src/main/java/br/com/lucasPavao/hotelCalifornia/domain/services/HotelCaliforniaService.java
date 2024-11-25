@@ -4,6 +4,7 @@ package br.com.lucasPavao.hotelCalifornia.domain.services;
 import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaDto;
 import br.com.lucasPavao.hotelCalifornia.domain.Utils.CnpjUtils;
 import br.com.lucasPavao.hotelCalifornia.domain.converter.GenericConverter;
+import br.com.lucasPavao.hotelCalifornia.infraestructure.exception.CnpjExistsException;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.exception.HotelNotFoundException;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.model.HotelCaliforniaModel;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.repository.HotelCaliforniaRepository;
@@ -110,21 +111,24 @@ public class HotelCaliforniaService {
 
     @Transactional
     public HotelCaliforniaDto create(@Valid HotelCaliforniaDto hotelDto) {
-        try{
+        try {
             HotelCaliforniaModel hotel = converter.convertToModel(hotelDto);
+
+
+            hotel.setCnpj(CnpjUtils.removerMascaraCNPJ(hotel.getCnpj()));
+
 
             validateHotelFields(hotel);
             validateCapacidade(hotel.getCapacidade());
             CnpjUtils.validate(hotel.getCnpj());
+            ifExists(hotel.getCnpj());
+
 
             hotel.setId(UUID.randomUUID());
-            hotel.setCnpj(CnpjUtils.removerMascaraCNPJ(hotel.getCnpj()));
             HotelCaliforniaModel savedHotel = repository.save(hotel);
+
             logger.info("Hotel criado com sucesso: {}", savedHotel);
-
-
             return converter.convertToDto(savedHotel);
-
         } catch (DataAccessException ex) {
             logger.error("Erro ao acessar o banco de dados durante a criação do hotel", ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar o hotel no banco de dados", ex);
@@ -133,6 +137,9 @@ public class HotelCaliforniaService {
             throw ex;
         }
     }
+
+
+
 
     @Transactional
     public HotelCaliforniaDto update(UUID id, @Valid HotelCaliforniaDto hotelDto) {
@@ -204,13 +211,20 @@ public class HotelCaliforniaService {
         }
     }
 
-
-
-
     private void validateCapacidade(int capacidade){
         if(capacidade < 0){
             throw new IllegalArgumentException("Capacidade não pode ser menor que zero!");
         }
     }
+
+    private void ifExists(String cnpj) {
+        String cnpjSemMascara = CnpjUtils.removerMascaraCNPJ(cnpj);
+        if (repository.existsByCnpj(cnpjSemMascara)) {
+            throw new CnpjExistsException("Hotel com CNPJ " + CnpjUtils.aplicarMascaraCNPJ(cnpjSemMascara) + " já existe.");
+        }
+    }
+
+
+
 
 }
