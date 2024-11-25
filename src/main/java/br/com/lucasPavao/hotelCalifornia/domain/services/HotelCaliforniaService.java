@@ -114,16 +114,16 @@ public class HotelCaliforniaService {
         try {
             HotelCaliforniaModel hotel = converter.convertToModel(hotelDto);
 
-            // Remover máscara antes de qualquer validação
+
             hotel.setCnpj(CnpjUtils.removerMascaraCNPJ(hotel.getCnpj()));
 
-            // Validações
+
             validateHotelFields(hotel);
             validateCapacidade(hotel.getCapacidade());
             CnpjUtils.validate(hotel.getCnpj());
             ifExists(hotel.getCnpj());
 
-            // Geração de ID e salvamento
+
             hotel.setId(UUID.randomUUID());
             HotelCaliforniaModel savedHotel = repository.save(hotel);
 

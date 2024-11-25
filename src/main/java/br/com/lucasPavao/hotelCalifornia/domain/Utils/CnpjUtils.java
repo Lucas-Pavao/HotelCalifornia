@@ -16,7 +16,7 @@ public class CnpjUtils {
         try {
             cnpj = removerMascaraCNPJ(cnpj);
 
-            String regex = "^[0-9]{14}$";
+            String regex = "^[A-Za-z0-9]{12}[0-9]{2}$";
             if (!Pattern.matches(regex, cnpj)) {
                 throw new InvalidCnpjException("CNPJ inválido: deve conter apenas 14 dígitos numéricos.");
             }
