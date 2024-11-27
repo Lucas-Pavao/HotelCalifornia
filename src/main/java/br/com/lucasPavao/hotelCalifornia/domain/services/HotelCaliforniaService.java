@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
 @Service
 public class HotelCaliforniaService {
 
@@ -30,7 +29,6 @@ public class HotelCaliforniaService {
     private static final Logger logger = LoggerFactory.getLogger(HotelCaliforniaService.class);
 
     public HotelCaliforniaService(HotelCaliforniaRepository repository, GenericConverter<HotelCaliforniaDto, HotelCaliforniaModel> converter) {
-
         this.repository = repository;
         this.converter = converter;
     }
@@ -138,9 +136,6 @@ public class HotelCaliforniaService {
         }
     }
 
-
-
-
     @Transactional
     public HotelCaliforniaDto update(UUID id, @Valid HotelCaliforniaDto hotelDto) {
         try {
@@ -203,7 +198,6 @@ public class HotelCaliforniaService {
         }
     }
 
-
     private void validateHotelFields(HotelCaliforniaModel hotel) {
         if (hotel.getName() == null || hotel.getLocal() == null ||
                 hotel.getCapacidade() == null || hotel.getCnpj() == null) {
@@ -223,8 +217,5 @@ public class HotelCaliforniaService {
             throw new CnpjExistsException("Hotel com CNPJ " + CnpjUtils.aplicarMascaraCNPJ(cnpjSemMascara) + " já existe.");
         }
     }
-
-
-
 
 }
