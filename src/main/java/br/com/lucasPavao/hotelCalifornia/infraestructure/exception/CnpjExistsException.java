@@ -1,7 +1,10 @@
 package br.com.lucasPavao.hotelCalifornia.infraestructure.exception;
 
-public class CnpjExistsException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+public class CnpjExistsException extends ResponseStatusException {
     public CnpjExistsException(String message) {
-        super(message);
+        super(HttpStatus.NOT_FOUND,message);
     }
 }

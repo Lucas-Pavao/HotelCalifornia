@@ -1,7 +1,10 @@
 package br.com.lucasPavao.hotelCalifornia.infraestructure.exception;
 
-public class HotelNotFoundException extends RuntimeException{
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+public class HotelNotFoundException extends ResponseStatusException {
     public HotelNotFoundException(String message) {
-        super(message);
+        super(HttpStatus.NOT_FOUND,message);
     }
 }
