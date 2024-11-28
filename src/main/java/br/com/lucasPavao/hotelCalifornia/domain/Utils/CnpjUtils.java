@@ -8,6 +8,9 @@ import java.util.regex.Pattern;
 public class CnpjUtils {
     
      public static void validate(String cnpj){
+         if (cnpj == null || cnpj.isEmpty()) {
+             throw new InvalidCnpjException("CNPJ não pode ser nulo ou vazio.");
+         }
           isValid(cnpj);
      }
 
@@ -18,16 +21,19 @@ public class CnpjUtils {
 
             String regex = "^[A-Za-z0-9]{12}[0-9]{2}$";
             if (!Pattern.matches(regex, cnpj)) {
-                throw new InvalidCnpjException("CNPJ inválido: deve conter apenas 14 dígitos numéricos.");
+                throw new InvalidCnpjException("CNPJ inválido: deve conter apenas 14 dígitos");
             }
 
 
-            if (cnpj.equals("00000000000000") || cnpj.equals("11111111111111") ||
-                    cnpj.equals("22222222222222") || cnpj.equals("33333333333333") ||
-                    cnpj.equals("44444444444444") || cnpj.equals("55555555555555") ||
-                    cnpj.equals("66666666666666") || cnpj.equals("77777777777777") ||
-                    cnpj.equals("88888888888888") || cnpj.equals("99999999999999")) {
-                throw new InvalidCnpjException("CNPJ inválido: Cnpj com valores repitidos!");
+            String[] sequenciasInvalidas = {
+                    "00000000000000", "11111111111111", "22222222222222", "33333333333333",
+                    "44444444444444", "55555555555555", "66666666666666", "77777777777777",
+                    "88888888888888", "99999999999999"
+            };
+            for (String seq : sequenciasInvalidas) {
+                if (cnpj.equals(seq)) {
+                    throw new InvalidCnpjException("CNPJ inválido: CNPJ com valores repetidos!");
+                }
             }
 
 
