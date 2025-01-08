@@ -31,4 +31,14 @@ public class HotelConverter  implements GenericConverter<HotelCaliforniaDto, Hot
                 .cnpj(hotelDto.getCnpj())
                 .build();
     }
+
+    public HotelCaliforniaModel converToModelUpdate(HotelCaliforniaModel hotelModel, HotelCaliforniaDto hotelDto, String cnpj){
+        return HotelCaliforniaModel.builder()
+                .id(hotelModel.getId())
+                .name(hotelDto.getName() != null ? hotelDto.getName() : hotelModel.getName())
+                .local(hotelDto.getLocal()!= null ? hotelDto.getLocal() : hotelModel.getLocal())
+                .capacidade(hotelDto.getCapacidade() != null ? hotelDto.getCapacidade() : hotelModel.getCapacidade())
+                .cnpj(cnpj)
+                .build();
+    }
 }

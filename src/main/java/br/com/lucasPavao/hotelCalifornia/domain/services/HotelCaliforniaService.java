@@ -116,7 +116,7 @@ public class HotelCaliforniaService {
             hotel.setCnpj(CnpjUtils.removerMascaraCNPJ(hotel.getCnpj()));
 
 
-            validateHotelFields(hotel);
+            validateHotelFields(hotelDto);
             validateCapacidade(hotel.getCapacidade());
             CnpjUtils.validate(hotel.getCnpj());
             ifExists(hotel.getCnpj());
@@ -137,25 +137,18 @@ public class HotelCaliforniaService {
     }
 
     @Transactional
-    public HotelCaliforniaDto update(UUID id, @Valid HotelCaliforniaDto hotelDto) {
+    public HotelCaliforniaDto update(String cnpj, @Valid HotelCaliforniaDto hotelDto) {
         try {
-            HotelCaliforniaModel hotel = converter.convertToModel(hotelDto);
 
 
-            validateHotelFields(hotel);
-            validateCapacidade(hotel.getCapacidade());
-            CnpjUtils.validate(hotel.getCnpj());
+            validateCapacidade(hotelDto.getCapacidade());
+            CnpjUtils.validate(hotelDto.getCnpj());
 
 
-            HotelCaliforniaModel existingHotel = repository.findById(id)
-                    .orElseThrow(() -> new HotelNotFoundException("Hotel com ID " + id + " não encontrado."));
+            HotelCaliforniaModel existingHotel = repository.findByCnpj(cnpj)
+                    .orElseThrow(() -> new HotelNotFoundException("Hotel com Cnpj " + cnpj + " não encontrado."));
 
-
-            existingHotel.setName(hotel.getName());
-            existingHotel.setLocal(hotel.getLocal());
-            existingHotel.setCapacidade(hotel.getCapacidade());
-            existingHotel.setCnpj(CnpjUtils.removerMascaraCNPJ(hotel.getCnpj()));
-
+            existingHotel = converter.converToModelUpdate(existingHotel, hotelDto, cnpj);
 
             HotelCaliforniaModel updatedHotel = repository.save(existingHotel);
             logger.info("Hotel atualizado com sucesso: {}", updatedHotel);
@@ -198,7 +191,7 @@ public class HotelCaliforniaService {
         }
     }
 
-    private void validateHotelFields(HotelCaliforniaModel hotel) {
+    private void validateHotelFields(HotelCaliforniaDto hotel) {
         if (hotel.getName() == null || hotel.getLocal() == null ||
                 hotel.getCapacidade() == null || hotel.getCnpj() == null) {
             throw new IllegalArgumentException("Todos os campos devem ser preenchidos.");
