@@ -6,6 +6,7 @@ import br.com.lucasPavao.hotelCalifornia.domain.Utils.CnpjUtils;
 import br.com.lucasPavao.hotelCalifornia.domain.converter.GenericConverter;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.exception.CnpjExistsException;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.exception.HotelNotFoundException;
+import br.com.lucasPavao.hotelCalifornia.infraestructure.exception.InvalidCapacityException;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.model.HotelCaliforniaModel;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.repository.HotelCaliforniaRepository;
 import org.slf4j.Logger;
@@ -200,7 +201,7 @@ public class HotelCaliforniaService {
 
     private void validateCapacidade(int capacidade){
         if(capacidade < 0){
-            throw new IllegalArgumentException("Capacidade não pode ser menor que zero!");
+            throw new InvalidCapacityException("Capacidade não pode ser menor que zero!");
         }
     }
 
