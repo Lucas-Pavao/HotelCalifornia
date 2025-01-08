@@ -78,7 +78,7 @@ public class HotelCaliforniaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(hotel));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{cnpj}")
     @Operation(summary = "Update a hotel", description = "Update details of an existing hotel",
             tags = {"Hotels"}, responses = {
             @ApiResponse(description = "Success", responseCode = "200",
@@ -88,10 +88,10 @@ public class HotelCaliforniaController {
             @ApiResponse(description = "Internal Error", responseCode = "500", content = {@Content})
     })
     public ResponseEntity<HotelCaliforniaDto> updateHotel(
-            @PathVariable UUID id,
+            @PathVariable String cnpj,
             @Valid @NotNull @RequestBody HotelCaliforniaDto hotel) {
 
-        return ResponseEntity.ok(service.update(id, hotel));
+        return ResponseEntity.ok(service.update(cnpj, hotel));
     }
 
     @DeleteMapping("/{id}")
