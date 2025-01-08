@@ -10,11 +10,6 @@ import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    public class HotelNotFoundException extends RuntimeException {
-        public HotelNotFoundException(String message) {
-            super(message);
-        }
-    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
@@ -64,5 +59,25 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(InvalidCapacityException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCapacityException(InvalidCapacityException ex) {
+        ErrorResponse response = new ErrorResponse(
+                "Bad Request",
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.value()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+        ErrorResponse response = new ErrorResponse(
+                "Internal Server Error",
+                "Ocorreu um erro inesperado. Entre em contato com o suporte.",
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }
