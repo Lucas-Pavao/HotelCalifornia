@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -44,6 +46,12 @@ public class HotelCaliforniaModel {
     @NotBlank(message = "CNPJ é obrigatório")
     @Pattern(regexp = "\\d{14}", message = "O CNPJ deve conter exatamente 14 dígitos")
     private String cnpj;
+
+    @ManyToMany(mappedBy = "hotel")
+    private Set<ClienteModel> clientes = new HashSet<>();
+
+
+
 
     public @NotNull UUID getId() {
         return id;

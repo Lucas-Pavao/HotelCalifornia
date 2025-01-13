@@ -9,5 +9,5 @@ public interface GenericConverter<D, M> {
     D convertToDto(M model);
 
     M convertToModel(D dto);
-    M converToModelUpdate (M model,D dto, String cnpj );
+    M converToModelUpdate (M model,D dto, String cnpjCpf );
 }
