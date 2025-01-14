@@ -1,8 +1,5 @@
 package br.com.lucasPavao.hotelCalifornia.api.dtos;
 
-import br.com.lucasPavao.hotelCalifornia.infraestructure.model.HotelCaliforniaModel;
-
-import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -13,39 +10,37 @@ import java.util.UUID;
 
 public class ClienteDto {
 
-    @Id
-    @Column(columnDefinition = "UUID")
     @NotNull
-    private UUID id = UUID.randomUUID();
+    private UUID id;
 
-    @Column(name = "name")
-    @NotNull
-    @NotBlank(message = "Nome do hotel é obrigatório")
-    @Size(max = 100, message = "O nome do hotel não pode ter mais que 100 caracteres")
+    @NotBlank(message = "Nome do cliente é obrigatório")
+    @Size(max = 100, message = "O nome do cliente não pode ter mais que 100 caracteres")
     private String name;
 
-    @Column(name = "cpf")
-    @NotNull
     @NotBlank(message = "CPF é obrigatório")
     @Pattern(regexp = "\\d{11}", message = "O CPF deve conter exatamente 11 dígitos")
     private String cpf;
 
-    @ManyToMany
-    @JoinTable(
-            name = "hotel_cliente",
-            joinColumns = @JoinColumn(name = "cliente_id"),
-            inverseJoinColumns = @JoinColumn(name = "hotel_id")
-    )
-    private Set<HotelCaliforniaModel> hotel = new HashSet<>();
+    @NotNull
+    @Size(min = 1, message = "Pelo menos um CNPJ de hotel deve ser informado")
+    private Set<@Pattern(regexp = "\\d{14}", message = "O CNPJ deve conter exatamente 14 dígitos") String> cnpjs = new HashSet<>();
 
-    public <R> ClienteDto(@NotNull @NotBlank(message = "Nome do hotel é obrigatório")
-                          @Size(max = 100, message = "O nome do hotel não pode ter mais que 100 caracteres")
-                          String name,
-                          @NotNull @NotBlank(message = "CPF é obrigatório")
-                          @Pattern(regexp = "\\d{11}", message = "O CPF deve conter exatamente 11 dígitos")
-                          String cnpj, R collect) {
+    // Construtor padrão
+    public ClienteDto() {
     }
 
+    // Construtor com argumentos
+    public ClienteDto(@NotNull UUID id,
+                      @NotBlank @Size(max = 100) String name,
+                      @NotBlank @Pattern(regexp = "\\d{11}") String cpf,
+                      @NotNull @Size(min = 1) Set<@Pattern(regexp = "\\d{14}") String> cnpjs) {
+        this.id = id;
+        this.name = name;
+        this.cpf = cpf;
+        this.cnpjs = cnpjs;
+    }
+
+    // Getters e Setters
     public UUID getId() {
         return id;
     }
@@ -70,11 +65,11 @@ public class ClienteDto {
         this.cpf = cpf;
     }
 
-    public Set<HotelCaliforniaModel> getHotel() {
-        return hotel;
+    public Set<String> getCnpjs() {
+        return cnpjs;
     }
 
-    public void setHotel(Set<HotelCaliforniaModel> hotel) {
-        this.hotel = hotel;
+    public void setCnpjs(Set<String> cnpjs) {
+        this.cnpjs = cnpjs;
     }
 }

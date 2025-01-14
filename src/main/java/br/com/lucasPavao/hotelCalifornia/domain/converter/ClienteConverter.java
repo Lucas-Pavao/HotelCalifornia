@@ -19,11 +19,14 @@ public class ClienteConverter implements GenericConverter<ClienteDto, ClienteMod
         }
 
         return new ClienteDto(
+                clienteModel.getId(),
                 clienteModel.getName(),
                 clienteModel.getCpf(),
-                clienteModel.getHotel().stream()
-                        .map(HotelCaliforniaModel::getId)
+                clienteModel.getHotel() != null
+                        ? clienteModel.getHotel().stream()
+                        .map(HotelCaliforniaModel::getCnpj)
                         .collect(Collectors.toSet())
+                        : null
         );
     }
 
@@ -37,15 +40,15 @@ public class ClienteConverter implements GenericConverter<ClienteDto, ClienteMod
                 .id(clienteDto.getId() != null ? clienteDto.getId() : UUID.randomUUID())
                 .name(clienteDto.getName())
                 .cpf(clienteDto.getCpf())
-                .hotel(clienteDto.getHotel() != null
-                        ? clienteDto.getHotel().stream()
-                        .map(id -> HotelCaliforniaModel.builder().id(id.getId()).build())
+                .hotel(clienteDto.getCnpjs() != null
+                        ? clienteDto.getCnpjs().stream()
+                        .map(cnpj -> HotelCaliforniaModel.builder().cnpj(cnpj).build())
                         .collect(Collectors.toSet())
                         : null)
                 .build();
     }
 
-
+    @Override
     public ClienteModel converToModelUpdate(ClienteModel clienteModel, ClienteDto clienteDto, String cnpjCpf) {
         if (clienteModel == null || clienteDto == null) {
             throw new IllegalArgumentException("ClienteModel e ClienteDto não podem ser nulos para a atualização.");
@@ -54,12 +57,15 @@ public class ClienteConverter implements GenericConverter<ClienteDto, ClienteMod
         return ClienteModel.builder()
                 .id(clienteModel.getId())
                 .name(clienteDto.getName() != null ? clienteDto.getName() : clienteModel.getName())
-                .cpf(cnpjCpf)
-                .hotel(clienteDto.getHotel() != null
-                        ? clienteDto.getHotel().stream()
-                        .map(id -> HotelCaliforniaModel.builder().id(id.getId()).build())
+                .cpf(clienteDto.getCpf() != null ? clienteDto.getCpf() : clienteModel.getCpf())
+                .hotel(clienteDto.getCnpjs() != null
+                        ? clienteDto.getCnpjs().stream()
+                        .map(cnpj -> HotelCaliforniaModel.builder().cnpj(cnpj).build())
                         .collect(Collectors.toSet())
                         : clienteModel.getHotel())
                 .build();
     }
+
+
+
 }

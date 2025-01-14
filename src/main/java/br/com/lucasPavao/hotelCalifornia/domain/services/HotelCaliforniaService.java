@@ -1,7 +1,8 @@
 package br.com.lucasPavao.hotelCalifornia.domain.services;
 
 
-import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaDto;
+import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaPostDto;
+import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaResponseDto;
 import br.com.lucasPavao.hotelCalifornia.domain.Utils.CnpjUtils;
 import br.com.lucasPavao.hotelCalifornia.domain.converter.GenericConverter;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.exception.CnpjExistsException;
@@ -26,15 +27,17 @@ import java.util.stream.Collectors;
 public class HotelCaliforniaService {
 
     private final HotelCaliforniaRepository repository;
-    private final GenericConverter<HotelCaliforniaDto, HotelCaliforniaModel> converter;
+    private final GenericConverter<HotelCaliforniaPostDto, HotelCaliforniaModel> converterPost;
+    private final GenericConverter<HotelCaliforniaResponseDto, HotelCaliforniaModel> converterResponse;
     private static final Logger logger = LoggerFactory.getLogger(HotelCaliforniaService.class);
 
-    public HotelCaliforniaService(HotelCaliforniaRepository repository, GenericConverter<HotelCaliforniaDto, HotelCaliforniaModel> converter) {
+    public HotelCaliforniaService(HotelCaliforniaRepository repository, GenericConverter<HotelCaliforniaPostDto, HotelCaliforniaModel> converterPost, GenericConverter<HotelCaliforniaResponseDto, HotelCaliforniaModel> converterResponse) {
         this.repository = repository;
-        this.converter = converter;
+        this.converterPost = converterPost;
+        this.converterResponse = converterResponse;
     }
 
-    public List<HotelCaliforniaDto> findAll() {
+    public List<HotelCaliforniaResponseDto> findAll() {
         logger.info("Iniciando busca de todos os hotéis");
 
         try {
@@ -47,7 +50,7 @@ public class HotelCaliforniaService {
                         String cnpjSemMascara = CnpjUtils.removerMascaraCNPJ(hotel.getCnpj());
                         String cnpjComMascara = CnpjUtils.aplicarMascaraCNPJ(cnpjSemMascara);
                         hotel.setCnpj(cnpjComMascara);
-                        return converter.convertToDto(hotel);
+                        return converterResponse.convertToDto(hotel);
                     })
                     .collect(Collectors.toList());
         } catch (DataAccessException ex) {
@@ -59,7 +62,7 @@ public class HotelCaliforniaService {
         }
     }
 
-    public HotelCaliforniaDto findById(UUID id) {
+    public HotelCaliforniaResponseDto findById(UUID id) {
         logger.info("Iniciando busca de hotel com ID: {}", id);
 
         try {
@@ -72,7 +75,7 @@ public class HotelCaliforniaService {
             hotel.setCnpj(CnpjUtils.aplicarMascaraCNPJ(hotel.getCnpj()));
 
             logger.info("Hotel com ID {} encontrado", id);
-            return converter.convertToDto(hotel);
+            return converterResponse.convertToDto(hotel);
         } catch (DataAccessException ex) {
             logger.error("Erro ao acessar o banco de dados durante a busca de hotel por ID", ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao buscar hotel por ID no banco de dados", ex);
@@ -82,7 +85,7 @@ public class HotelCaliforniaService {
         }
     }
 
-    public HotelCaliforniaDto findByCnpj(String cnpj) {
+    public HotelCaliforniaResponseDto findByCnpj(String cnpj) {
         logger.info("Iniciando busca de hotel com CNPJ: {}", cnpj);
 
         try {
@@ -98,7 +101,7 @@ public class HotelCaliforniaService {
             hotel.setCnpj(CnpjUtils.aplicarMascaraCNPJ(hotel.getCnpj()));
 
             logger.info("Hotel com CNPJ {} encontrado", cnpj);
-            return converter.convertToDto(hotel);
+            return converterResponse.convertToDto(hotel);
         } catch (DataAccessException ex) {
             logger.error("Erro ao acessar o banco de dados durante a busca de hotel por CNPJ", ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao buscar hotel por CNPJ no banco de dados", ex);
@@ -109,15 +112,15 @@ public class HotelCaliforniaService {
     }
 
     @Transactional
-    public HotelCaliforniaDto create(@Valid HotelCaliforniaDto hotelDto) {
+    public HotelCaliforniaResponseDto create(@Valid HotelCaliforniaPostDto hotelPostDto) {
         try {
-            HotelCaliforniaModel hotel = converter.convertToModel(hotelDto);
+            HotelCaliforniaModel hotel = converterPost.convertToModel(hotelPostDto);
 
 
             hotel.setCnpj(CnpjUtils.removerMascaraCNPJ(hotel.getCnpj()));
 
 
-            validateHotelFields(hotelDto);
+            validateHotelFields(hotelPostDto);
             validateCapacidade(hotel.getCapacidade());
             CnpjUtils.validate(hotel.getCnpj());
             ifExists(hotel.getCnpj());
@@ -127,7 +130,7 @@ public class HotelCaliforniaService {
             HotelCaliforniaModel savedHotel = repository.save(hotel);
 
             logger.info("Hotel criado com sucesso: {}", savedHotel);
-            return converter.convertToDto(savedHotel);
+            return converterResponse.convertToDto(savedHotel);
         } catch (DataAccessException ex) {
             logger.error("Erro ao acessar o banco de dados durante a criação do hotel", ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar o hotel no banco de dados", ex);
@@ -138,23 +141,23 @@ public class HotelCaliforniaService {
     }
 
     @Transactional
-    public HotelCaliforniaDto update(String cnpj, @Valid HotelCaliforniaDto hotelDto) {
+    public HotelCaliforniaResponseDto update(String cnpj, @Valid HotelCaliforniaPostDto hotelPostDto) {
         try {
 
 
-            validateCapacidade(hotelDto.getCapacidade());
-            CnpjUtils.validate(hotelDto.getCnpj());
+            validateCapacidade(hotelPostDto.getCapacidade());
+            CnpjUtils.validate(hotelPostDto.getCnpj());
 
 
             HotelCaliforniaModel existingHotel = repository.findByCnpj(cnpj)
                     .orElseThrow(() -> new HotelNotFoundException("Hotel com Cnpj " + cnpj + " não encontrado."));
 
-            existingHotel = converter.converToModelUpdate(existingHotel, hotelDto, cnpj);
+            existingHotel = converterPost.converToModelUpdate(existingHotel, hotelPostDto, cnpj);
 
             HotelCaliforniaModel updatedHotel = repository.save(existingHotel);
             logger.info("Hotel atualizado com sucesso: {}", updatedHotel);
 
-            return converter.convertToDto(updatedHotel);
+            return converterResponse.convertToDto(updatedHotel);
 
         }
         catch (DataAccessException ex) {
@@ -192,7 +195,7 @@ public class HotelCaliforniaService {
         }
     }
 
-    private void validateHotelFields(HotelCaliforniaDto hotel) {
+    private void validateHotelFields(HotelCaliforniaPostDto hotel) {
         if (hotel.getName() == null || hotel.getLocal() == null ||
                 hotel.getCapacidade() == null || hotel.getCnpj() == null) {
             throw new IllegalArgumentException("Todos os campos devem ser preenchidos.");

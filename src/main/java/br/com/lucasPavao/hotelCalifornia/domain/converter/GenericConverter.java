@@ -1,6 +1,4 @@
 package br.com.lucasPavao.hotelCalifornia.domain.converter;
-
-import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaDto;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.model.HotelCaliforniaModel;
 import org.springframework.stereotype.Component;
 

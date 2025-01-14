@@ -47,7 +47,7 @@ public class HotelCaliforniaModel {
     @Pattern(regexp = "\\d{14}", message = "O CNPJ deve conter exatamente 14 dígitos")
     private String cnpj;
 
-    @ManyToMany(mappedBy = "hotel")
+    @ManyToMany(mappedBy = "hotel", fetch = FetchType.EAGER)
     private Set<ClienteModel> clientes = new HashSet<>();
 
 

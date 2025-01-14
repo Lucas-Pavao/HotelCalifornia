@@ -1,11 +1,11 @@
 package br.com.lucasPavao.hotelCalifornia.api.dtos;
 
-import br.com.lucasPavao.hotelCalifornia.infraestructure.model.HotelCaliforniaModel;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
-import javax.validation.constraints.*;
-import java.util.UUID;
-
-public class HotelCaliforniaDto {
+public class HotelCaliforniaPostDto {
 
     @NotNull
     @NotBlank(message = "Nome do hotel é obrigatório")
@@ -18,7 +18,6 @@ public class HotelCaliforniaDto {
     private String local;
 
     @NotNull(message = "Capacidade é obrigatória")
-    @Min(value = 1, message = "Capacidade deve ser pelo menos 1")
     private Integer capacidade;
 
     @NotNull
@@ -26,12 +25,9 @@ public class HotelCaliforniaDto {
     @Pattern(regexp = "\\d{14}", message = "O CNPJ deve conter exatamente 14 dígitos")
     private String cnpj;
 
+    public HotelCaliforniaPostDto() {}
 
-    public HotelCaliforniaDto() {}
-
-
-    public   HotelCaliforniaDto(String name, String local, Integer capacidade, String cnpj) {
-
+    public HotelCaliforniaPostDto(String name, String local, Integer capacidade, String cnpj) {
         this.name = name;
         this.local = local;
         this.capacidade = capacidade;
