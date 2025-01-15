@@ -41,6 +41,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
+    @ExceptionHandler(ClienteNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleClienteNotFoundException(ClienteNotFoundException ex) {
+        ErrorResponse response = new ErrorResponse(
+                "Not Found",
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND.value()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
     @ExceptionHandler(InvalidCnpjException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCnpjException(InvalidCnpjException ex) {
         ErrorResponse response = new ErrorResponse(

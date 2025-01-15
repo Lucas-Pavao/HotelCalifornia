@@ -3,7 +3,8 @@ package br.com.lucasPavao.hotelCalifornia.api.controllers;
 import java.util.List;
 import java.util.UUID;
 
-import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaDto;
+import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaPostDto;
+import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaResponseDto;
 import br.com.lucasPavao.hotelCalifornia.domain.services.HotelCaliforniaService;
 import com.sun.istack.NotNull;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,10 +36,10 @@ public class HotelCaliforniaController {
             tags = {"Hotels"}, responses = {
             @ApiResponse(description = "Success", responseCode = "200",
                     content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = HotelCaliforniaDto.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = HotelCaliforniaResponseDto.class)))),
             @ApiResponse(description = "Internal Error", responseCode = "500", content = {@Content})
     })
-    public ResponseEntity<List<HotelCaliforniaDto>> getAllHotels() {
+    public ResponseEntity<List<HotelCaliforniaResponseDto>> getAllHotels() {
         return ResponseEntity.ok(service.findAll());
     }
 
@@ -46,11 +47,11 @@ public class HotelCaliforniaController {
     @Operation(summary = "Find a hotel by ID", description = "Retrieve hotel details by its ID",
             tags = {"Hotels"}, responses = {
             @ApiResponse(description = "Success", responseCode = "200",
-                    content = @Content(schema = @Schema(implementation = HotelCaliforniaDto.class))),
+                    content = @Content(schema = @Schema(implementation = HotelCaliforniaResponseDto.class))),
             @ApiResponse(description = "Not Found", responseCode = "404", content = {@Content}),
             @ApiResponse(description = "Internal Error", responseCode = "500", content = {@Content})
     })
-    public ResponseEntity<HotelCaliforniaDto> getHotelById(@PathVariable UUID id) {
+    public ResponseEntity<HotelCaliforniaResponseDto> getHotelById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
@@ -58,11 +59,11 @@ public class HotelCaliforniaController {
     @Operation(summary = "Find a hotel by CNPJ", description = "Retrieve hotel details by its CNPJ",
             tags = {"Hotels"}, responses = {
             @ApiResponse(description = "Success", responseCode = "200",
-                    content = @Content(schema = @Schema(implementation = HotelCaliforniaDto.class))),
+                    content = @Content(schema = @Schema(implementation = HotelCaliforniaResponseDto.class))),
             @ApiResponse(description = "Not Found", responseCode = "404", content = {@Content}),
             @ApiResponse(description = "Internal Error", responseCode = "500", content = {@Content})
     })
-    public ResponseEntity<HotelCaliforniaDto> getHotelByCnpj(@PathVariable String cnpj) {
+    public ResponseEntity<HotelCaliforniaResponseDto> getHotelByCnpj(@PathVariable String cnpj) {
         return ResponseEntity.ok(service.findByCnpj(cnpj));
     }
 
@@ -70,11 +71,11 @@ public class HotelCaliforniaController {
     @Operation(summary = "Create a hotel", description = "Add a new hotel to the system",
             tags = {"Hotels"}, responses = {
             @ApiResponse(description = "Created", responseCode = "201",
-                    content = @Content(schema = @Schema(implementation = HotelCaliforniaDto.class))),
+                    content = @Content(schema = @Schema(implementation = HotelCaliforniaResponseDto.class))),
             @ApiResponse(description = "Bad Request", responseCode = "400", content = {@Content}),
             @ApiResponse(description = "Internal Error", responseCode = "500", content = {@Content})
     })
-    public ResponseEntity<HotelCaliforniaDto> createHotel(@Valid @NotNull @RequestBody HotelCaliforniaDto hotel) {
+    public ResponseEntity<HotelCaliforniaResponseDto> createHotel(@Valid @NotNull @RequestBody HotelCaliforniaPostDto hotel) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(hotel));
     }
 
@@ -82,14 +83,14 @@ public class HotelCaliforniaController {
     @Operation(summary = "Update a hotel", description = "Update details of an existing hotel",
             tags = {"Hotels"}, responses = {
             @ApiResponse(description = "Success", responseCode = "200",
-                    content = @Content(schema = @Schema(implementation = HotelCaliforniaDto.class))),
+                    content = @Content(schema = @Schema(implementation = HotelCaliforniaResponseDto.class))),
             @ApiResponse(description = "Bad Request", responseCode = "400", content = {@Content}),
             @ApiResponse(description = "Not Found", responseCode = "404", content = {@Content}),
             @ApiResponse(description = "Internal Error", responseCode = "500", content = {@Content})
     })
-    public ResponseEntity<HotelCaliforniaDto> updateHotel(
+    public ResponseEntity<HotelCaliforniaResponseDto> updateHotel(
             @PathVariable String cnpj,
-            @Valid @NotNull @RequestBody HotelCaliforniaDto hotel) {
+            @Valid @NotNull @RequestBody HotelCaliforniaPostDto hotel) {
 
         return ResponseEntity.ok(service.update(cnpj, hotel));
     }
@@ -114,7 +115,7 @@ public class HotelCaliforniaController {
             @ApiResponse(description = "Not Found", responseCode = "404", content = {@Content}),
             @ApiResponse(description = "Internal Error", responseCode = "500", content = {@Content})
     })
-    public ResponseEntity<HotelCaliforniaDto> deleteHotelByCnpj(@PathVariable String cnpj) {
+    public ResponseEntity<HotelCaliforniaResponseDto> deleteHotelByCnpj(@PathVariable String cnpj) {
         service.deleteByCnpj(cnpj);
         return ResponseEntity.noContent().build();
     }

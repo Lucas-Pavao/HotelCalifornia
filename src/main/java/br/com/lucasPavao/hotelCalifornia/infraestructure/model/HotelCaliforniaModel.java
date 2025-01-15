@@ -1,5 +1,6 @@
 package br.com.lucasPavao.hotelCalifornia.infraestructure.model;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -39,49 +42,17 @@ public class HotelCaliforniaModel {
     @Min(value = 1, message = "Capacidade deve ser pelo menos 1")
     private Integer capacidade;
 
-    @Column(name = "cnpj")
+    @Column(name = "cnpj", unique = true)
     @NotNull
     @NotBlank(message = "CNPJ é obrigatório")
     @Pattern(regexp = "\\d{14}", message = "O CNPJ deve conter exatamente 14 dígitos")
     private String cnpj;
 
-    public @NotNull UUID getId() {
-        return id;
-    }
-
-    public void setId(@NotNull UUID id) {
-        this.id = id;
-    }
-
-    public @NotNull @NotBlank(message = "Nome do hotel é obrigatório") @Size(max = 100, message = "O nome do hotel não pode ter mais que 100 caracteres") String getName() {
-        return name;
-    }
-
-    public void setName(@NotNull @NotBlank(message = "Nome do hotel é obrigatório") @Size(max = 100, message = "O nome do hotel não pode ter mais que 100 caracteres") String name) {
-        this.name = name;
-    }
-
-    public @NotNull @NotBlank(message = "Local é obrigatório") @Size(max = 200, message = "A localização do hotel não pode ter mais que 200 caracteres") String getLocal() {
-        return local;
-    }
-
-    public void setLocal(@NotNull @NotBlank(message = "Local é obrigatório") @Size(max = 200, message = "A localização do hotel não pode ter mais que 200 caracteres") String local) {
-        this.local = local;
-    }
-
-    public @NotNull(message = "Capacidade é obrigatória") @Min(value = 1, message = "Capacidade deve ser pelo menos 1") Integer getCapacidade() {
-        return capacidade;
-    }
-
-    public void setCapacidade(@NotNull(message = "Capacidade é obrigatória") @Min(value = 1, message = "Capacidade deve ser pelo menos 1") Integer capacidade) {
-        this.capacidade = capacidade;
-    }
-
-    public @NotNull @NotBlank(message = "CNPJ é obrigatório") @Pattern(regexp = "\\d{14}", message = "O CNPJ deve conter exatamente 14 dígitos") String getCnpj() {
-        return cnpj;
-    }
-
-    public void setCnpj(@NotNull @NotBlank(message = "CNPJ é obrigatório") @Pattern(regexp = "\\d{14}", message = "O CNPJ deve conter exatamente 14 dígitos") String cnpj) {
-        this.cnpj = cnpj;
-    }
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "hotel_cliente",
+            joinColumns = @JoinColumn(name = "hotel_id"),
+            inverseJoinColumns = @JoinColumn(name = "cliente_id")
+    )
+    private Set<ClienteModel> clientes = new HashSet<>();
 }
