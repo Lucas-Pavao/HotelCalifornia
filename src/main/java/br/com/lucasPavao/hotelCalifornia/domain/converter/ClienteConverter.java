@@ -5,6 +5,7 @@ import br.com.lucasPavao.hotelCalifornia.infraestructure.model.ClienteModel;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.model.HotelCaliforniaModel;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -14,19 +15,15 @@ public class ClienteConverter implements GenericConverter<ClienteDto, ClienteMod
 
     @Override
     public ClienteDto convertToDto(ClienteModel clienteModel) {
-        if (clienteModel == null) {
-            return null;
-        }
-
         return new ClienteDto(
                 clienteModel.getId(),
                 clienteModel.getName(),
                 clienteModel.getCpf(),
-                clienteModel.getHotel() != null
-                        ? clienteModel.getHotel().stream()
+                clienteModel.getHotels() != null
+                        ? clienteModel.getHotels().stream()
                         .map(HotelCaliforniaModel::getCnpj)
                         .collect(Collectors.toSet())
-                        : null
+                        : new HashSet<>()
         );
     }
 
@@ -40,7 +37,7 @@ public class ClienteConverter implements GenericConverter<ClienteDto, ClienteMod
                 .id(clienteDto.getId() != null ? clienteDto.getId() : UUID.randomUUID())
                 .name(clienteDto.getName())
                 .cpf(clienteDto.getCpf())
-                .hotel(clienteDto.getCnpjs() != null
+                .hotels(clienteDto.getCnpjs() != null
                         ? clienteDto.getCnpjs().stream()
                         .map(cnpj -> HotelCaliforniaModel.builder().cnpj(cnpj).build())
                         .collect(Collectors.toSet())
@@ -58,11 +55,11 @@ public class ClienteConverter implements GenericConverter<ClienteDto, ClienteMod
                 .id(clienteModel.getId())
                 .name(clienteDto.getName() != null ? clienteDto.getName() : clienteModel.getName())
                 .cpf(clienteDto.getCpf() != null ? clienteDto.getCpf() : clienteModel.getCpf())
-                .hotel(clienteDto.getCnpjs() != null
+                .hotels(clienteDto.getCnpjs() != null
                         ? clienteDto.getCnpjs().stream()
                         .map(cnpj -> HotelCaliforniaModel.builder().cnpj(cnpj).build())
                         .collect(Collectors.toSet())
-                        : clienteModel.getHotel())
+                        : clienteModel.getHotels())
                 .build();
     }
 

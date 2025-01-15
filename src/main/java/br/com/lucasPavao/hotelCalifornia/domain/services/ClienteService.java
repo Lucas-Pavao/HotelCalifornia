@@ -30,160 +30,124 @@ public class ClienteService {
     private final GenericConverter<ClienteDto, ClienteModel> converter;
     private static final Logger logger = LoggerFactory.getLogger(ClienteService.class);
 
-    public ClienteService(ClienteRepository clienteRepository, HotelCaliforniaRepository hotelRepository, GenericConverter<ClienteDto, ClienteModel> converter) {
+    public ClienteService(
+            ClienteRepository clienteRepository,
+            HotelCaliforniaRepository hotelRepository,
+            GenericConverter<ClienteDto, ClienteModel> converter) {
         this.clienteRepository = clienteRepository;
         this.hotelRepository = hotelRepository;
         this.converter = converter;
     }
 
     public List<ClienteDto> findAll() {
-        logger.info("Iniciando busca de todos os clientes");
-
+        logger.info("Iniciando busca de todos os clientes.");
         try {
             List<ClienteModel> clientes = clienteRepository.findAll();
-
-            logger.info("Foram encontrados {} clientes", clientes.size());
+            logger.info("Foram encontrados {} clientes.", clientes.size());
 
             return clientes.stream()
                     .map(converter::convertToDto)
                     .collect(Collectors.toList());
         } catch (DataAccessException ex) {
-            logger.error("Erro ao acessar o banco de dados durante a busca de todos os clientes", ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao buscar clientes no banco de dados", ex);
-        } catch (Exception ex) {
-            logger.error("Erro inesperado ao buscar todos os clientes", ex);
-            throw ex;
+            logger.error("Erro ao acessar o banco de dados durante a busca de todos os clientes.", ex);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao buscar clientes no banco de dados.", ex);
         }
     }
 
     public ClienteDto findById(UUID id) {
         logger.info("Iniciando busca de cliente com ID: {}", id);
-
         try {
             ClienteModel cliente = clienteRepository.findById(id)
-                    .orElseThrow(() -> {
-                        logger.warn("Cliente com ID {} não encontrado", id);
-                        return new ClienteNotFoundException("Cliente com ID " + id + " não encontrado.");
-                    });
+                    .orElseThrow(() -> new ClienteNotFoundException("Cliente com ID " + id + " não encontrado."));
 
-            logger.info("Cliente com ID {} encontrado", id);
+            logger.info("Cliente com ID {} encontrado.", id);
             return converter.convertToDto(cliente);
         } catch (DataAccessException ex) {
-            logger.error("Erro ao acessar o banco de dados durante a busca de cliente por ID", ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao buscar cliente por ID no banco de dados", ex);
-        } catch (Exception ex) {
-            logger.error("Erro inesperado ao buscar cliente com ID: {}", id, ex);
-            throw ex;
+            logger.error("Erro ao acessar o banco de dados durante a busca de cliente por ID.", ex);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao buscar cliente por ID no banco de dados.", ex);
         }
     }
 
     public ClienteDto findByCpf(String cpf) {
-        logger.info("Iniciando busca de cliente com Cpf: {}", cpf);
+        logger.info("Iniciando busca de cliente com CPF: {}", cpf);
 
         try {
             ClienteModel cliente = clienteRepository.findByCpf(cpf)
                     .orElseThrow(() -> {
-                        logger.warn("Cliente com cpf {} não encontrado", cpf);
-                        return new ClienteNotFoundException("Cliente com cpf " + cpf + " não encontrado.");
+                        logger.warn("Cliente com CPF {} não encontrado", cpf);
+                        return new ClienteNotFoundException("Cliente com CPF " + cpf + " não encontrado.");
                     });
 
-            logger.info("Cliente com cpf {} encontrado", cpf);
+            // Log dos hotéis associados
+            logger.info("Cliente encontrado: {}, hotéis associados: {}", cliente.getName(),
+                    cliente.getHotels().stream().map(HotelCaliforniaModel::getCnpj).collect(Collectors.toSet()));
+
             return converter.convertToDto(cliente);
-        } catch (DataAccessException ex) {
-            logger.error("Erro ao acessar o banco de dados durante a busca de cliente por CPF", ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao buscar cliente por CPF no banco de dados", ex);
         } catch (Exception ex) {
-            logger.error("Erro inesperado ao buscar cliente com CPF: {}", cpf, ex);
+            logger.error("Erro ao buscar cliente com CPF: {}", cpf, ex);
             throw ex;
         }
     }
 
+
     @Transactional
     public ClienteDto create(ClienteDto clienteDto) {
+        logger.info("Iniciando criação de cliente.");
         try {
-            // Converter o DTO para o modelo de cliente
             ClienteModel cliente = converter.convertToModel(clienteDto);
 
-            // Localizar os hotéis pelos CNPJs informados
             Set<HotelCaliforniaModel> hotels = clienteDto.getCnpjs().stream()
-                    .map(cnpj -> hotelRepository.findByCnpj(cnpj)
-                            .orElseThrow(() -> new IllegalArgumentException("Hotel com CNPJ " + cnpj + " não encontrado")))
+                    .map(cnpj -> hotelRepository.findByCnpjWithClientes(cnpj)
+                            .orElseThrow(() -> new IllegalArgumentException("Hotel com CNPJ " + cnpj + " não encontrado.")))
                     .collect(Collectors.toSet());
 
-            // Configurar os hotéis encontrados no cliente
-            cliente.setHotel(hotels);
-
-            // Salvar o cliente no banco de dados
+            cliente.setHotels(hotels);
             ClienteModel savedCliente = clienteRepository.save(cliente);
 
-            // Logar o sucesso
             logger.info("Cliente criado com sucesso: {}", savedCliente);
-
-            // Retornar o DTO do cliente salvo
             return converter.convertToDto(savedCliente);
         } catch (DataIntegrityViolationException ex) {
             logger.error("Violação de integridade ao salvar o cliente: {}", clienteDto, ex);
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Dados inválidos ou duplicados para o cliente",
-                    ex
-            );
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Dados inválidos ou duplicados para o cliente.", ex);
         } catch (IllegalArgumentException ex) {
             logger.error("Erro de validação ao criar cliente: {}", ex.getMessage(), ex);
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    ex.getMessage(),
-                    ex
-            );
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
         } catch (DataAccessException ex) {
-            logger.error("Erro ao acessar o banco de dados durante a criação do cliente", ex);
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Erro ao salvar o cliente no banco de dados",
-                    ex
-            );
-        } catch (Exception ex) {
-            logger.error("Erro inesperado ao criar cliente", ex);
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Erro inesperado ao criar o cliente",
-                    ex
-            );
+            logger.error("Erro ao acessar o banco de dados durante a criação do cliente.", ex);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar o cliente no banco de dados.", ex);
         }
     }
 
     @Transactional
     public ClienteDto update(String cpf, @Valid ClienteDto clienteDto) {
+        logger.info("Iniciando atualização do cliente com CPF: {}", cpf);
         try {
             ClienteModel existingCliente = clienteRepository.findByCpf(cpf)
-                    .orElseThrow(() -> new ClienteNotFoundException("Cliente com ID " + cpf + " não encontrado."));
+                    .orElseThrow(() -> new ClienteNotFoundException("Cliente com CPF " + cpf + " não encontrado."));
 
             existingCliente = converter.converToModelUpdate(existingCliente, clienteDto, cpf);
 
             ClienteModel updatedCliente = clienteRepository.save(existingCliente);
             logger.info("Cliente atualizado com sucesso: {}", updatedCliente);
-
             return converter.convertToDto(updatedCliente);
         } catch (DataAccessException ex) {
-            logger.error("Erro ao acessar o banco de dados durante a atualização do cliente", ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao atualizar o cliente no banco de dados", ex);
-        } catch (Exception ex) {
-            logger.error("Erro inesperado ao atualizar cliente", ex);
-            throw ex;
+            logger.error("Erro ao acessar o banco de dados durante a atualização do cliente.", ex);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao atualizar o cliente no banco de dados.", ex);
         }
     }
 
     @Transactional
     public void delete(UUID id) {
+        logger.info("Iniciando exclusão do cliente com ID: {}", id);
         try {
             if (!clienteRepository.existsById(id)) {
                 throw new ClienteNotFoundException("Cliente com ID " + id + " não encontrado.");
             }
             clienteRepository.deleteById(id);
-            logger.info("Cliente com ID {} excluído com sucesso", id);
+            logger.info("Cliente com ID {} excluído com sucesso.", id);
         } catch (DataAccessException ex) {
-            logger.error("Erro ao acessar o banco de dados durante a exclusão do cliente", ex);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao excluir o cliente no banco de dados", ex);
+            logger.error("Erro ao acessar o banco de dados durante a exclusão do cliente.", ex);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao excluir o cliente no banco de dados.", ex);
         }
     }
 }

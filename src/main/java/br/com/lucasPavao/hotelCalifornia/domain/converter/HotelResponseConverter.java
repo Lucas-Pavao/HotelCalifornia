@@ -5,6 +5,7 @@ import br.com.lucasPavao.hotelCalifornia.api.dtos.HotelCaliforniaResponseDto;
 import br.com.lucasPavao.hotelCalifornia.infraestructure.model.HotelCaliforniaModel;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Component
@@ -32,9 +33,11 @@ public class HotelResponseConverter implements GenericConverter<HotelCaliforniaR
                         ? hotelModel.getClientes().stream()
                         .map(clienteConverter::convertToDto)
                         .collect(Collectors.toList())
-                        : null
+                        : Collections.emptyList()
         );
     }
+
+
 
 
 
